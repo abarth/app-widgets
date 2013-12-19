@@ -1,0 +1,23 @@
+{
+  "name": "polymer-app-elements",
+  "version": "0.0.0",
+  "homepage": "https://github.com/abarth/polymer-app-elements",
+  "authors": [
+    "Adam Barth <abarth@chromium.org>"
+  ],
+  "description": "Experiments in creating Polymer elements for mobile web apps",
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "platform": "Polymer/platform#~0.1.1",
+    "polymer": "Polymer/polymer#~0.1.1",
+    "polymer-elements": "Polymer/polymer-elements#~0.1.1",
+    "polymer-ui-elements": "Polymer/polymer-ui-elements#~0.1.1"
+  }
+}
