@@ -1,5 +1,5 @@
-app-elements
-============
+app-widgets
+===========
 
 Experiments in creating Polymer elements for mobile web apps
 
