@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<link rel="import" href="bower_components/polymer/polymer.html">
+<style>
+html {
+    height: 100%;
+}
+body {
+    display: block;
+    height: 100%;
+    margin: 0;
+    background-color: red;
+}
+</style>
+<polymer-element name="app-frame">
+  <template>
+    <style>
+      :host {
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer('app-frame', {
+    });
+  </script>
+</polymer-element>
+<polymer-element name="app-column">
+  <template>
+    <style>
+      :host {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer('app-column', {
+    });
+  </script>
+</polymer-element>
+<polymer-element name="app-drawer" attributes="active">
+  <template>
+    <style>
+      :host {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 300px;
+        bottom: 0;
+        background-color: white;
+        -webkit-transform: translate3d(0,0,0);
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer('app-drawer', {
+      active: false,
+    });
+  </script>
+</polymer-element>

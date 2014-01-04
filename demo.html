@@ -1,0 +1,37 @@
+<!doctype html>
+<!--
+Copyright 2013 The Polymer Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+-->
+<html>
+  <head>
+    <title>app-widgets</title>
+    <script src="bower_components/platform/platform.js"></script>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <link rel="import" href="app-widgets.html">
+    <link rel="import" href="bower_components/polymer-ui-menu/polymer-ui-menu.html">
+    <link rel="import" href="bower_components/polymer-ui-menu-item/polymer-ui-menu-item.html">
+    <link rel="import" href="bower_components/polymer-ui-toolbar/polymer-ui-toolbar.html">
+    <link rel="import" href="bower_components/polymer-ui-icon-button/polymer-ui-icon-button.html">
+  </head>
+  <body class="polymer-ui-body-text" unresolved>
+    <app-frame>
+      <polymer-ui-toolbar theme="polymer-ui-light-theme">
+        <polymer-ui-icon-button icon="menu"></polymer-ui-icon-button>
+        <div flex>Demo app</div>
+        <polymer-ui-icon-button icon="refresh"></polymer-ui-icon-button>
+        <polymer-ui-icon-button icon="add"></polymer-ui-icon-button>
+      </polymer-ui-toolbar>
+      <app-column>
+        <app-drawer>
+          <polymer-ui-menu selected="0" theme="polymer-ui-light-theme" active="false">
+            <polymer-ui-menu-item icon="settings" label="Settings"></polymer-ui-menu-item>
+            <polymer-ui-menu-item icon="dialog" label="Dialog"></polymer-ui-menu-item>
+            <polymer-ui-menu-item icon="search" label="Search"></polymer-ui-menu-item>
+          </polymer-ui-menu>
+        </app-drawer>
+      </app-content>
+    </app-column>
+  </body>
+</html>

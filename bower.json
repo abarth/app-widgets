@@ -1,7 +1,7 @@
 {
-  "name": "polymer-app-elements",
+  "name": "app-widgets",
   "version": "0.0.0",
-  "homepage": "https://github.com/abarth/polymer-app-elements",
+  "homepage": "https://github.com/abarth/app-widgets",
   "authors": [
     "Adam Barth <abarth@chromium.org>"
   ],
