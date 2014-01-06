@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <link rel="import" href="bower_components/polymer/polymer.html">
+<script src="dynamics.js"></script>
 <style>
 html {
     height: 100%;
@@ -51,7 +52,8 @@ body {
 <polymer-element name="app-drawer" attributes="active">
   <template>
     <style>
-      :host {
+      #content {
+        display: none;
         position: absolute;
         top: 0;
         left: 0;
@@ -59,13 +61,53 @@ body {
         bottom: 0;
         background-color: white;
         -webkit-transform: translate3d(0,0,0);
+        overflow-y: scroll;
+      }
+      #mask {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: black;
+        -webkit-transform: translate3d(0,0,0);
       }
     </style>
-    <content></content>
+    <div id="mask"></div>
+    <div id="content">
+      <content></content>
+    </div>
   </template>
   <script>
     Polymer('app-drawer', {
       active: false,
+      toggle: function() {
+        this.controller.toggle();
+      },
+      enteredView: function() {
+        var content = this.$.content;
+        var mask = this.$.mask;
+        this.controller = new DrawerController({
+            target: this,
+            left: 0,
+            right: 300,
+            position: 0,
+            willOpen: function() {
+                mask.style.display = 'block';
+                content.style.display = 'block';
+            },
+            didClose: function() {
+                mask.style.display = 'none';
+                content.style.display = 'none';
+            },
+            onAnimate: function(position) {
+                // FIXME: We should animate the opacity from zero, but that triggers http://crbug.com/328106
+                mask.style.opacity = ((position + 1) / 300) * 0.2;
+                content.style.WebkitTransform = 'translate3d(' + (position - 300) + 'px,0,0)';
+            },
+        });
+      },
     });
   </script>
 </polymer-element>
