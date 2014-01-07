@@ -3,13 +3,13 @@
 <script src="dynamics.js"></script>
 <style>
 html {
-    height: 100%;
+  height: 100%;
 }
 body {
-    display: block;
-    height: 100%;
-    margin: 0;
-    background-color: red;
+  display: block;
+  height: 100%;
+  margin: 0;
+  background-color: red;
 }
 </style>
 <polymer-element name="app-frame">
@@ -36,7 +36,7 @@ body {
     <style>
       :host {
         position: relative;
-        overflow: hidden;
+        overflow: auto;
         display: flex;
         flex-direction: column;
         flex: 1;
@@ -109,6 +109,20 @@ body {
             },
         });
       },
+    });
+  </script>
+</polymer-element>
+<polymer-element name="app-dismissable-item">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer('app-dismissable-item', {
     });
   </script>
 </polymer-element>

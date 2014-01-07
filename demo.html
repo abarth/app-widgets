@@ -14,6 +14,12 @@ license that can be found in the LICENSE file.
     <link rel="import" href="bower_components/polymer-ui-menu-item/polymer-ui-menu-item.html">
     <link rel="import" href="bower_components/polymer-ui-toolbar/polymer-ui-toolbar.html">
     <link rel="import" href="bower_components/polymer-ui-icon-button/polymer-ui-icon-button.html">
+    <style>
+      .message {
+        padding: 20px 3px;
+        border-bottom: 1px solid lightgray;
+      }
+    </style>
   </head>
   <body class="polymer-ui-body-text" unresolved>
     <app-frame>
@@ -24,6 +30,26 @@ license that can be found in the LICENSE file.
         <polymer-ui-icon-button icon="add"></polymer-ui-icon-button>
       </polymer-ui-toolbar>
       <app-column>
+        <app-column>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+          <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
+        </app-column>
         <app-drawer id="nav-drawer">
           <polymer-ui-menu selected="0" theme="polymer-ui-light-theme" active="false">
             <polymer-ui-menu-item icon="settings" label="Settings"></polymer-ui-menu-item>
@@ -56,8 +82,8 @@ license that can be found in the LICENSE file.
             <polymer-ui-menu-item icon="search" label="Search"></polymer-ui-menu-item>
           </polymer-ui-menu>
         </app-drawer>
-      </app-content>
-    </app-column>
+      </app-column>
+    </app-frame>
     <script>
       // document.addEventListener('WebComponentsReady', function() {
       document.getElementById('menu-button').addEventListener('click', function() {
