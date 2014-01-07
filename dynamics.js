@@ -7,6 +7,8 @@ function Animator(delegate) {
 };
 
 Animator.prototype.scheduleAnimation_ = function() {
+    if (this.request_)
+        return;
     this.request_ = requestAnimationFrame(this.onAnimation_.bind(this));
 };
 
@@ -22,6 +24,7 @@ Animator.prototype.stopAnimation = function() {
 };
 
 Animator.prototype.onAnimation_ = function(timeStamp) {
+    this.request_ = null;
     if (!this.startTimeStamp)
         this.startTimeStamp = timeStamp;
     if (this.delegate.onAnimation(timeStamp))
@@ -81,6 +84,48 @@ VelocityTracker.prototype.onTouchEnd = function(e) {
     this.recentTouchMoves_ = [];
 };
 
+function LinearTimingFunction() {
+};
+
+LinearTimingFunction.prototype.scaleTime = function(fraction) {
+  return fraction;
+};
+
+function CubicBezierTimingFunction(spec) {
+  this.map = [];
+  for (var ii = 0; ii <= 100; ii += 1) {
+    var i = ii / 100;
+    this.map.push([
+      3 * i * (1 - i) * (1 - i) * spec[0] +
+          3 * i * i * (1 - i) * spec[2] + i * i * i,
+      3 * i * (1 - i) * (1 - i) * spec[1] +
+          3 * i * i * (1 - i) * spec[3] + i * i * i
+    ]);
+  }
+};
+
+CubicBezierTimingFunction.prototype.scaleTime = function(fraction) {
+  var fst = 0;
+  while (fst !== 100 && fraction > this.map[fst][0]) {
+    fst += 1;
+  }
+  if (fraction === this.map[fst][0] || fst === 0) {
+    return this.map[fst][1];
+  }
+  var yDiff = this.map[fst][1] - this.map[fst - 1][1];
+  var xDiff = this.map[fst][0] - this.map[fst - 1][0];
+  var p = (fraction - this.map[fst - 1][0]) / xDiff;
+  return this.map[fst - 1][1] + p * yDiff;
+};
+
+var presetTimingFunctions = {
+  'linear': new LinearTimingFunction(),
+  'ease': new CubicBezierTimingFunction([0.25, 0.1, 0.25, 1.0]),
+  'ease-in': new CubicBezierTimingFunction([0.42, 0, 1.0, 1.0]),
+  'ease-out': new CubicBezierTimingFunction([0, 0, 0.58, 1.0]),
+  'ease-in-out': new CubicBezierTimingFunction([0.42, 0, 0.58, 1.0]),
+};
+
 function DrawerController(options) {
     this.velocityTracker = new VelocityTracker();
     this.animator = new Animator(this);
@@ -89,6 +134,9 @@ function DrawerController(options) {
     this.left = options.left;
     this.right = options.right;
     this.position = options.position;
+
+    this.width = this.right - this.left;
+    this.curve = presetTimingFunctions[options.curve || 'linear'];
 
     this.willOpenCallback = options.willOpen;
     this.didCloseCallback = options.didClose;
@@ -182,7 +230,6 @@ DrawerController.prototype.onTouchEnd = function(e) {
 
     var velocityX = this.velocityTracker.velocityX;
     if (Math.abs(velocityX) > DrawerController.kMinFlingVelocity) {
-        this.state = DrawerController.kFlinging;
         this.fling(velocityX);
     } else if (this.isOpen()) {
         this.open();
@@ -191,9 +238,25 @@ DrawerController.prototype.onTouchEnd = function(e) {
     }
 };
 
+DrawerController.prototype.openFraction = function() {
+    var width = this.right - this.left;
+    var offset = this.position - this.left;
+    return offset / width;
+};
+
 DrawerController.prototype.isOpen = function() {
     return this.openFraction() >= 0.5;
 };
+
+DrawerController.prototype.isOpening = function() {
+    return this.state == DrawerController.kOpening ||
+        (this.state == DrawerController.kFlinging && this.animationVelocityX > 0);
+}
+
+DrawerController.prototype.isClosing = function() {
+    return this.state == DrawerController.kClosing ||
+        (this.state == DrawerController.kFlinging && this.animationVelocityX < 0);
+}
 
 DrawerController.prototype.toggle = function() {
     if (this.isOpen())
@@ -206,43 +269,53 @@ DrawerController.prototype.open = function() {
     if (!this.position)
         this.willOpenCallback();
 
-    this.animationStartFraction = this.openFraction();
+    this.animator.stopAnimation();
+    this.animationDuration = DrawerController.kMaxSettleDurationMS;
     this.state = DrawerController.kOpening;
-    this.fling(this.defaultAnimationSpeed);
+    this.animate();
 };
 
 DrawerController.prototype.close = function() {
-    this.animationStartFraction = 1 - this.openFraction();
+    this.animator.stopAnimation();
+    this.animationDuration = DrawerController.kMaxSettleDurationMS;
     this.state = DrawerController.kClosing;
-    this.fling(-this.defaultAnimationSpeed);
-};
-
-DrawerController.prototype.openFraction = function() {
-    var width = this.right - this.left;
-    var offset = this.position - this.left;
-    return offset / width;
+    this.animate();
 };
 
 DrawerController.prototype.fling = function(velocityX) {
-    this.positionAnimationBase = this.position;
+    this.animator.stopAnimation();
     this.animationVelocityX = velocityX;
+    this.state = DrawerController.kFlinging;
+    this.animate();
+};
+
+DrawerController.prototype.animate = function() {
+    this.positionAnimationBase = this.position;
     this.animator.startAnimation();
+};
+
+DrawerController.prototype.targetPosition = function(deltaT) {
+    if (this.state == DrawerController.kFlinging)
+        return this.positionAnimationBase + this.animationVelocityX * deltaT;
+    var targetFraction = this.curve.scaleTime(deltaT / this.animationDuration);
+    var animationWidth = this.state == DrawerController.kOpening ?
+      this.width - this.positionAnimationBase : -this.positionAnimationBase;
+    return this.positionAnimationBase + targetFraction * animationWidth;
 };
 
 DrawerController.prototype.onAnimation = function(timeStamp) {
     var deltaT = timeStamp - this.animator.startTimeStamp;
-    var deltaX = this.animationVelocityX * deltaT;
-    var targetPosition = this.positionAnimationBase + deltaX;
+    var targetPosition = this.targetPosition(deltaT);
     this.position = this.restrictToBounds(targetPosition);
 
     this.animateCallback.call(this.target, this.position);
 
-    if (targetPosition <= this.left && this.animationVelocityX < 0) {
+    if (targetPosition <= this.left && this.isClosing()) {
         this.state = DrawerController.kClosed;
         this.didCloseCallback();
         return false;
     }
-    if (targetPosition >= this.right && this.animationVelocityX > 0) {
+    if (targetPosition >= this.right && this.isOpening()) {
         this.state = DrawerController.kOpened;
         return false;
     }
