@@ -270,7 +270,7 @@ DrawerController.prototype.toggle = function() {
 
 DrawerController.prototype.open = function() {
     if (!this.position)
-        this.willOpenCallback();
+        this.willOpenCallback.call(this.target);
 
     this.animator.stopAnimation();
     this.animationDuration = DrawerController.kMaxSettleDurationMS;
@@ -315,7 +315,7 @@ DrawerController.prototype.onAnimation = function(timeStamp) {
 
     if (targetPosition <= this.left && this.isClosing()) {
         this.state = DrawerController.kClosed;
-        this.didCloseCallback();
+        this.didCloseCallback.call(this.target);
         return false;
     }
     if (targetPosition >= this.right && this.isOpening()) {
@@ -332,8 +332,8 @@ function DismissController(options) {
     this.animator = new Animator(this);
 
     this.target = options.target;
-    this.moveCallback = options.moveCallback;
-    this.dismissCallback = options.dismissCallback;
+    this.moveCallback = options.onMove;
+    this.dismissCallback = options.onDismiss;
     this.curve = presetTimingFunctions[options.curve || 'linear'];
 
     this.position = 0;
