@@ -1,3 +1,5 @@
+"use strict";
+
 (function(exports) {
 
 function Animator(delegate) {
@@ -189,6 +191,7 @@ DrawerController.prototype.onTouchStart = function(e) {
     this.animator.stopAnimation();
     this.target.addEventListener('touchmove', this.onTouchMove);
     this.target.addEventListener('touchend', this.onTouchEnd);
+    // TODO(abarth): Handle touchcancel.
 
     this.startX = touchX;
     this.startY = touchY;
@@ -340,12 +343,13 @@ function DismissController(options) {
     this.target.addEventListener('touchstart', this.onTouchStart.bind(this));
     this.target.addEventListener('touchmove', this.onTouchMove.bind(this));
     this.target.addEventListener('touchend', this.onTouchEnd.bind(this));
-    this.target.addEventListener('touchcancel', this.onTouchCancel.bind(this));
+    // TODO(abarth): Handle touchcancel.
 }
 
 DismissController.kInitial = 'initial';
 DismissController.kDragging = 'dragging';
 DismissController.kSettling = 'settling';
+DismissController.kFlinging = 'flinging';
 DismissController.kDismissed = 'dismissed';
 
 DismissController.prototype.onTouchStart = function(e) {
@@ -393,8 +397,13 @@ DismissController.prototype.onTouchEnd = function(e) {
     this.velocityTracker.onTouchEnd(e);
 
     if (this.state == DismissController.kDragging) {
-        var fraction = this.position / this.width;
+        var velocityX = this.velocityTracker.velocityX;
+        if (Math.abs(velocityX) > DrawerController.kMinFlingVelocity) {
+            this.fling(velocityX);
+            return;
+        }
 
+        var fraction = this.position / this.width;
         if (fraction > 0.5)
             this.settle(this.width);
         else if (fraction < -0.5)
@@ -404,9 +413,13 @@ DismissController.prototype.onTouchEnd = function(e) {
     }
 };
 
-DismissController.prototype.onTouchCancel = function(e) {
-    if (this.state == DismissController.kScrolling)
-        return;
+DismissController.prototype.fling = function(velocityX) {
+    this.animator.stopAnimation();
+    this.animationVelocityX = velocityX;
+    this.basePosition = this.position;
+    this.state = DismissController.kFlinging;
+    this.targetPosition = velocityX < 0 ? -this.width : this.width;
+    this.animator.startAnimation();
 };
 
 DismissController.prototype.settle = function(targetPosition) {
@@ -418,22 +431,34 @@ DismissController.prototype.settle = function(targetPosition) {
     this.animator.startAnimation();
 };
 
-DismissController.prototype.onAnimation = function(timeStamp) {
-    var deltaT = timeStamp - this.animator.startTimeStamp;
+DismissController.prototype.computeTargetPosition = function(deltaT) {
+    var approximateTargetPosition = 0;
+    var movingLeftward = false;
 
-    var targetFraction = this.curve.scaleTime(deltaT / this.animationDuration);
-    var animationWidth = this.targetPosition - this.basePosition;
-    var approximateTargetPosition = this.basePosition + targetFraction * animationWidth;
+    if (this.state == DismissController.kSettling) {
+        var targetFraction = this.curve.scaleTime(deltaT / this.animationDuration);
+        var animationWidth = this.targetPosition - this.basePosition;
+        approximateTargetPosition = this.basePosition + targetFraction * animationWidth;
+        movingLeftward = animationWidth < 0;
+    } else if (this.state == DismissController.kFlinging) {
+        approximateTargetPosition = this.basePosition + this.animationVelocityX * deltaT;
+        movingLeftward = this.animationVelocityX < 0;
+    }
 
     var lowerBound = -this.width;
     var upperBound = this.width;
-    if (animationWidth < 0 && this.targetPosition == 0)
+    if (movingLeftward && this.targetPosition == 0)
         lowerBound = 0;
-    else if (animationWidth > 0 && this.targetPosition == 0)
+    else if (!movingLeftward && this.targetPosition == 0)
         upperBound = 0;
 
-    this.position = Math.max(lowerBound, Math.min(upperBound, approximateTargetPosition));
+    return Math.max(lowerBound, Math.min(upperBound, approximateTargetPosition));
+};
 
+DismissController.prototype.onAnimation = function(timeStamp) {
+    var deltaT = timeStamp - this.animator.startTimeStamp;
+
+    this.position = this.computeTargetPosition(deltaT);
     this.moveCallback.call(this.target, this.position);
 
     if (this.position != this.targetPosition)
