@@ -331,6 +331,7 @@ function DismissController(options) {
     this.target = options.target;
     this.moveCallback = options.moveCallback;
     this.dismissCallback = options.dismissCallback;
+    this.curve = presetTimingFunctions[options.curve || 'linear'];
 
     this.position = 0;
     this.width = 0;
@@ -420,7 +421,7 @@ DismissController.prototype.settle = function(targetPosition) {
 DismissController.prototype.onAnimation = function(timeStamp) {
     var deltaT = timeStamp - this.animator.startTimeStamp;
 
-    var targetFraction = deltaT / this.animationDuration;
+    var targetFraction = this.curve.scaleTime(deltaT / this.animationDuration);
     var animationWidth = this.targetPosition - this.basePosition;
     var approximateTargetPosition = this.basePosition + targetFraction * animationWidth;
 

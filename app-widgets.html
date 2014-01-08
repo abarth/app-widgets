@@ -128,6 +128,7 @@ body {
       enteredView: function() {
         this.controller = new DismissController({
             target: this,
+            curve: 'ease-in-out',
             moveCallback: function(position) {
               this.style.WebkitTransform = 'translate3d(' + position + 'px,0,0)';
             },
