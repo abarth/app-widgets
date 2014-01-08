@@ -17,7 +17,11 @@ license that can be found in the LICENSE file.
     <style>
       .message {
         padding: 20px 3px;
+        background-color: white;
         border-bottom: 1px solid lightgray;
+      }
+      .messages {
+        background-color: darkgrey;
       }
     </style>
   </head>
@@ -30,7 +34,7 @@ license that can be found in the LICENSE file.
         <polymer-ui-icon-button icon="add"></polymer-ui-icon-button>
       </polymer-ui-toolbar>
       <app-column>
-        <app-column>
+        <app-column class="messages">
           <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
           <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>
           <app-dismissable-item class="message">Lorem ipsum</app-dismissable-item>

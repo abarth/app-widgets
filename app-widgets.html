@@ -131,6 +131,8 @@ body {
             target: this,
             curve: 'ease-in-out',
             moveCallback: function(position) {
+              var width = this.offsetWidth;
+              this.style.opacity = (width - Math.abs(position)) / width;
               this.style.WebkitTransform = 'translate3d(' + position + 'px,0,0)';
             },
             dismissCallback: function(direction) {
