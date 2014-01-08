@@ -470,7 +470,7 @@ DismissController.prototype.onAnimation = function(timeStamp) {
     }
 
     this.state = DismissController.kDismissed;
-    this.dismissCallback(this.targetPosition < 0 ? 'left' : 'right');
+    this.dismissCallback.call(this.target, this.targetPosition < 0 ? 'left' : 'right');
     return false;
 };
 
