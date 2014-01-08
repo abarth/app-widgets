@@ -349,6 +349,9 @@ DismissController.kDismissed = 'dismissed';
 DismissController.prototype.onTouchStart = function(e) {
     this.velocityTracker.onTouchStart(e);
 
+    this.state = DismissController.kInitial;
+    this.animator.stopAnimation();
+
     this.startX = e.changedTouches[0].clientX;
     this.startY = e.changedTouches[0].clientY;
     this.startPosition = this.position;
@@ -390,8 +393,12 @@ DismissController.prototype.onTouchEnd = function(e) {
     if (this.state == DismissController.kDragging) {
         var fraction = this.position / this.width;
 
-        // if (Math.abs(fraction) < 0.5)
-        this.settle(0);
+        if (fraction > 0.5)
+            this.settle(this.width);
+        else if (fraction < -0.5)
+            this.settle(-this.width);
+        else
+            this.settle(0)
     }
 };
 
@@ -402,7 +409,7 @@ DismissController.prototype.onTouchCancel = function(e) {
 
 DismissController.prototype.settle = function(targetPosition) {
     this.animator.stopAnimation();
-    this.animationDuration = DrawerController.kMaxSettleDurationMS;
+    this.animationDuration = DrawerController.kBaseSettleDurationMS;
     this.state = DismissController.kSettling;
     this.basePosition = this.position;
     this.targetPosition = targetPosition;
