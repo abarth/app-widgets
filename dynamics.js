@@ -330,6 +330,7 @@ function DismissController(options) {
 
     this.target = options.target;
     this.moveCallback = options.moveCallback;
+    this.dismissCallback = options.dismissCallback;
 
     this.position = 0;
     this.width = 0;

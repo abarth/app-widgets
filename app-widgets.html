@@ -129,7 +129,10 @@ body {
         this.controller = new DismissController({
             target: this,
             moveCallback: function(position) {
-                this.style.WebkitTransform = 'translate3d(' + position + 'px,0,0)';
+              this.style.WebkitTransform = 'translate3d(' + position + 'px,0,0)';
+            },
+            dismissCallback: function(direction) {
+              console.log("Dismissed: " + direction);
             },
         });
       },
