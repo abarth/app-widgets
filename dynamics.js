@@ -326,11 +326,13 @@ DrawerController.prototype.onAnimation = function(timeStamp) {
 
 function DismissController(options) {
     this.velocityTracker = new VelocityTracker();
+    this.animator = new Animator(this);
 
     this.target = options.target;
-    this.dragCallback = options.dragCallback;
+    this.moveCallback = options.moveCallback;
 
     this.position = 0;
+    this.width = 0;
     this.state = DismissController.kInitial;
 
     this.target.addEventListener('touchstart', this.onTouchStart.bind(this));
@@ -341,6 +343,8 @@ function DismissController(options) {
 
 DismissController.kInitial = 'initial';
 DismissController.kDragging = 'dragging';
+DismissController.kSettling = 'settling';
+DismissController.kDismissed = 'dismissed';
 
 DismissController.prototype.onTouchStart = function(e) {
     this.velocityTracker.onTouchStart(e);
@@ -371,22 +375,69 @@ DismissController.prototype.onTouchMove = function(e) {
         }
 
         this.state = DismissController.kDragging;
+        this.width = this.target.offsetWidth;
     }
 
     e.preventDefault();
     var deltaX = e.changedTouches[0].clientX - this.startX;
     this.position = this.startPosition + deltaX;
-    this.dragCallback.call(this.target, this.position);
+    this.moveCallback.call(this.target, this.position);
 };
 
 DismissController.prototype.onTouchEnd = function(e) {
-    if (this.state == DismissController.kScrolling)
-        return;
+    this.velocityTracker.onTouchEnd(e);
+
+    if (this.state == DismissController.kDragging) {
+        var fraction = this.position / this.width;
+
+        // if (Math.abs(fraction) < 0.5)
+        this.settle(0);
+    }
 };
 
 DismissController.prototype.onTouchCancel = function(e) {
     if (this.state == DismissController.kScrolling)
         return;
+};
+
+DismissController.prototype.settle = function(targetPosition) {
+    this.animator.stopAnimation();
+    this.animationDuration = DrawerController.kMaxSettleDurationMS;
+    this.state = DismissController.kSettling;
+    this.basePosition = this.position;
+    this.targetPosition = targetPosition;
+    this.animator.startAnimation();
+};
+
+DismissController.prototype.onAnimation = function(timeStamp) {
+    var deltaT = timeStamp - this.animator.startTimeStamp;
+
+    var targetFraction = deltaT / this.animationDuration;
+    var animationWidth = this.targetPosition - this.basePosition;
+    var approximateTargetPosition = this.basePosition + targetFraction * animationWidth;
+
+    var lowerBound = -this.width;
+    var upperBound = this.width;
+    if (animationWidth < 0 && this.targetPosition == 0)
+        lowerBound = 0;
+    else if (animationWidth > 0 && this.targetPosition == 0)
+        upperBound = 0;
+
+    this.position = Math.max(lowerBound, Math.min(upperBound, approximateTargetPosition));
+
+    this.moveCallback.call(this.target, this.position);
+
+    if (this.position != this.targetPosition)
+        return true;
+
+    if (this.targetPosition == 0) {
+        this.state = DismissController.kInitial;
+        return false;
+    }
+
+    this.state = DismissController.kDismissed;
+    this.dismissCallback(this.targetPosition < 0 ? 'left' : 'right');
+    return false;
 };
 
 exports.DrawerController = DrawerController;

@@ -128,9 +128,9 @@ body {
       enteredView: function() {
         this.controller = new DismissController({
             target: this,
-            dragCallback: function(position) {
+            moveCallback: function(position) {
                 this.style.WebkitTransform = 'translate3d(' + position + 'px,0,0)';
-            }.bind(this),
+            },
         });
       },
     });
