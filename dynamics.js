@@ -323,6 +323,73 @@ DrawerController.prototype.onAnimation = function(timeStamp) {
     return true;
 };
 
+
+function DismissController(options) {
+    this.velocityTracker = new VelocityTracker();
+
+    this.target = options.target;
+    this.dragCallback = options.dragCallback;
+
+    this.position = 0;
+    this.state = DismissController.kInitial;
+
+    this.target.addEventListener('touchstart', this.onTouchStart.bind(this));
+    this.target.addEventListener('touchmove', this.onTouchMove.bind(this));
+    this.target.addEventListener('touchend', this.onTouchEnd.bind(this));
+    this.target.addEventListener('touchcancel', this.onTouchCancel.bind(this));
+}
+
+DismissController.kInitial = 'initial';
+DismissController.kDragging = 'dragging';
+
+DismissController.prototype.onTouchStart = function(e) {
+    this.velocityTracker.onTouchStart(e);
+
+    this.startX = e.changedTouches[0].clientX;
+    this.startY = e.changedTouches[0].clientY;
+    this.startPosition = this.position;
+};
+
+DismissController.prototype.onTouchMove = function(e) {
+    this.velocityTracker.onTouchMove(e);
+
+    if (this.state == DismissController.kScrolling)
+        return;
+
+    if (this.state == DismissController.kInitial) {
+        var deltaX = e.changedTouches[0].clientX - this.startX;
+        var deltaY = e.changedTouches[0].clientY - this.startY;
+
+        if (deltaX * deltaX + deltaY * deltaY < DrawerController.kTouchSlopSquare) {
+            e.preventDefault();
+            return;
+        }
+
+        if (Math.abs(deltaY) > Math.abs(deltaX)) {
+            this.state = DismissController.kScrolling;
+            return;
+        }
+
+        this.state = DismissController.kDragging;
+    }
+
+    e.preventDefault();
+    var deltaX = e.changedTouches[0].clientX - this.startX;
+    this.position = this.startPosition + deltaX;
+    this.dragCallback.call(this.target, this.position);
+};
+
+DismissController.prototype.onTouchEnd = function(e) {
+    if (this.state == DismissController.kScrolling)
+        return;
+};
+
+DismissController.prototype.onTouchCancel = function(e) {
+    if (this.state == DismissController.kScrolling)
+        return;
+};
+
 exports.DrawerController = DrawerController;
+exports.DismissController = DismissController;
 
 })(window);

@@ -117,12 +117,23 @@ body {
     <style>
       :host {
         display: block;
+        -webkit-transform: translate3d(0,0,0);
+        flex-shrink: 0;
       }
     </style>
     <content></content>
   </template>
   <script>
     Polymer('app-dismissable-item', {
+      enteredView: function() {
+        this.controller = new DismissController({
+            target: this,
+            dragCallback: function(deltaX) {
+                console.log(deltaX);
+                this.style.WebkitTransform = 'translate3d(' + deltaX + 'px,0,0)';
+            }.bind(this),
+        });
+      },
     });
   </script>
 </polymer-element>
