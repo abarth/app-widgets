@@ -145,13 +145,12 @@ body {
     });
   </script>
 </polymer-element>
-<polymer-element name="app-scrollarea-toolbar">
+<polymer-element name="app-scrollarea-toolbar" attributes="location for">
   <template>
     <style>
       :host {
         display: block;
-        position: fixed;
-        bottom: 0;
+        position: absolute;
         left: 0;
         right: 0;
         -webkit-transform: translate3d(0,0,0);
@@ -161,13 +160,29 @@ body {
     <content></content>
   </template>
   <script>
+    function findParentTreeScope(node) {
+      while(node.parentNode)
+        node = node.parentNode;
+      return node;
+    }
+
     Polymer('app-scrollarea-toolbar', {
+      'for': null,
+      location: 'top',
       enteredView: function() {
+        if (this.location == 'top')
+          this.style.top = 0;
+        else
+          this.style.bottom = 0;
+
+        var scrollArea = findParentTreeScope(this).getElementById(this['for']);
+
         this.controller = new ScrollAreaToolbarController({
           target: this,
-          scrollArea: this.parentNode,
+          scrollArea: scrollArea,
           onMove: function(position) {
-            this.style.WebkitTransform = 'translate3d(0,' + position +'px,0)';
+            var translateY = this.location == 'top' ? -position : position;
+            this.style.WebkitTransform = 'translate3d(0,' + translateY +'px,0)';
           },
         });
       },
