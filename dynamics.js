@@ -474,7 +474,23 @@ DismissController.prototype.onAnimation = function(timeStamp) {
     return false;
 };
 
+function ScrollAreaToolbarController(options) {
+    this.moveCallback = options.onMove;
+    this.target = options.target;
+    this.scrollArea = options.scrollArea;
+    this.scrollArea.addEventListener("scroll", this.onScroll.bind(this));
+    this.scrollBase = 0;
+};
+
+ScrollAreaToolbarController.prototype.onScroll = function(e) {
+    if (!this.height)
+        this.height = this.target.offsetHeight;
+    var delta = Math.min(Math.max(this.scrollArea.scrollTop - this.scrollBase, 0), this.height);
+    this.moveCallback.call(this.target, delta);
+};
+
 exports.DrawerController = DrawerController;
 exports.DismissController = DismissController;
+exports.ScrollAreaToolbarController = ScrollAreaToolbarController;
 
 })(window);

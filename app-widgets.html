@@ -145,3 +145,32 @@ body {
     });
   </script>
 </polymer-element>
+<polymer-element name="app-scrollarea-toolbar">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        -webkit-transform: translate3d(0,0,0);
+        flex-shrink: 0;
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer('app-scrollarea-toolbar', {
+      enteredView: function() {
+        this.controller = new ScrollAreaToolbarController({
+          target: this,
+          scrollArea: this.parentNode,
+          onMove: function(position) {
+            this.style.WebkitTransform = 'translate3d(0,' + position +'px,0)';
+          },
+        });
+      },
+    });
+  </script>
+</polymer-element>
