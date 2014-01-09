@@ -36,11 +36,13 @@ body {
     <style>
       :host {
         position: relative;
-        overflow-x: hidden;
-        overflow-y: auto;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         flex: 1;
+      }
+      :host([scrollable]) {
+        overflow-y: auto;
       }
     </style>
     <content></content>
