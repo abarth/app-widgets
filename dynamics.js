@@ -231,7 +231,7 @@ DrawerController.prototype.onTouchMove = function(e) {
     e.preventDefault();
     var touchDeltaX = e.changedTouches[0].clientX - this.touchBaseX;
     this.position = this.restrictToBounds(this.startPosition + touchDeltaX);
-    this.animateCallback.call(this.target, this.position);
+    this.animator.scheduleAnimation();
 };
 
 DrawerController.prototype.onTouchEnd = function(e) {
@@ -315,6 +315,11 @@ DrawerController.prototype.targetPosition = function(deltaT) {
 };
 
 DrawerController.prototype.onAnimation = function(timeStamp) {
+    if (this.state == DrawerController.kDragging) {
+        this.animateCallback.call(this.target, this.position);
+        return false;
+    }
+
     var deltaT = timeStamp - this.animator.startTimeStamp;
     var targetPosition = this.targetPosition(deltaT);
     this.position = this.restrictToBounds(targetPosition);
