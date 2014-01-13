@@ -9,7 +9,6 @@ body {
   display: block;
   height: 100%;
   margin: 0;
-  background-color: red;
 }
 </style>
 <polymer-element name="app-frame">
@@ -132,6 +131,7 @@ body {
   <script>
     Polymer('app-dismissable-item', {
       enteredView: function() {
+        this.style.WebkitTransform = 'translate3d(0,0,0)';
         this.controller = new DismissController({
             target: this,
             curve: 'ease-in-out',
