@@ -281,14 +281,14 @@ DrawerController.prototype.open = function() {
         this.willOpenCallback.call(this.target);
 
     this.animator.stopAnimation();
-    this.animationDuration = DrawerController.kMaxSettleDurationMS;
+    this.animationDuration = 400;
     this.state = DrawerController.kOpening;
     this.animate();
 };
 
 DrawerController.prototype.close = function() {
     this.animator.stopAnimation();
-    this.animationDuration = DrawerController.kMaxSettleDurationMS;
+    this.animationDuration = 400;
     this.state = DrawerController.kClosing;
     this.animate();
 };
