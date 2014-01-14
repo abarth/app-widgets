@@ -14,6 +14,6 @@ Running
 
 To view the demo, run an HTTP server:
 
-  $ python -m SimpleHTTPServer 4444
+    $ python -m SimpleHTTPServer 4444
 
 Then visit http://localhost:4444/demo.html in your browser.
