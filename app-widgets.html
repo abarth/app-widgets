@@ -141,7 +141,25 @@ body {
               this.style.WebkitTransform = 'translate3d(' + position + 'px,0,0)';
             },
             onDismiss: function(direction) {
-              this.remove();
+              // Remove padding and set the height so that the height animation
+              // goes from the current height to 0 instead of current height to
+              // the padding height.
+              this.style.height = this.clientHeight + 'px';
+              this.style.padding = 0;
+
+              // Empty the contents of the item to make layouts fast.
+              this.textContent = '';
+
+              // Force a layout to get the above styling to take before the start
+              // of the animation.
+              this.offsetTop;
+
+              this.style.height = 0;
+              this.style.transition = "height 0.2s ease-in-out";
+
+              this.addEventListener('webkitTransitionEnd', function() {
+                this.remove();
+              });
             },
         });
       },
