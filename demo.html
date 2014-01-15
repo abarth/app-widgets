@@ -16,7 +16,6 @@ license that can be found in the LICENSE file.
     <link rel="import" href="bower_components/polymer-ui-icon-button/polymer-ui-icon-button.html">
     <style>
       .message {
-        padding: 20px 10px;
         background-color: white;
         border-bottom: 1px solid lightgray;
       }
@@ -26,6 +25,36 @@ license that can be found in the LICENSE file.
       .padding-wrapper {
         padding: 60px 0;
         flex-shrink: 0;
+      }
+      .when {
+        padding: 16px;
+        align-items: center;
+        background-color: #aad;
+      }
+      .message-part {
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          margin: 2px;
+      }
+      .subject {
+        font-weight: bold;
+      }
+      .small-font {
+          font-size: 14px;
+      }
+      .unread {
+          font-weight: bold;
+      }
+      .when {
+          color: #555;
+          border-bottom: 1px solid #ccc;
+      }
+      .message {
+          border-bottom: 1px solid #ccc;
+      }
+      .message-group {
+          margin-bottom: 20px;
+          background-color: #fefefe;
       }
     </style>
   </head>
@@ -40,24 +69,26 @@ license that can be found in the LICENSE file.
       <app-column>
         <app-column id="messages" scrollable>
           <div class="padding-wrapper">
-            <app-dismissable-item class="message">Lorem ipsum 1</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 2</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 3</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 4</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 5</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 6</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 7</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 8</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 9</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 10</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 11</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 12</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 13</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 14</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 15</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 16</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 17</app-dismissable-item>
-            <app-dismissable-item class="message">Lorem ipsum 18</app-dismissable-item>
+            <template id="messages-template" repeat>
+              <div class="message-group">
+                <div class="when">
+                  <div style="font-size: 14px; font-weight: bold;">{{ when }}</div>
+                </div>
+                <template repeat="{{ messages }}">
+                  <app-dismissable-item class="message">
+                    <div style="padding: 10px;">
+                      <div class="message-part subject">{{ subject }}</div>
+                      <div class="message-part small-font">
+                        <template repeat="{{ authors }}">
+                          <span class="author {{ unread ? 'unread' : '' }}">{{ name }}</span>
+                        </template>
+                      </div>
+                      <div class="message-part small-font" style="color: #999">{{ snippet }}</div>
+                    </div>
+                  </app-dismissable-item>
+                </template>
+              </div>
+            </template>
           </div>
         </app-column>
         <app-scrollarea-toolbar for="messages">
@@ -109,10 +140,45 @@ license that can be found in the LICENSE file.
       </app-column>
     </app-frame>
     <script>
+      var messageData = [
+          {
+              when: 'TODAY',
+              messages: [
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+              ],
+          },
+          {
+              when: 'YESTERDAY',
+              messages: [
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+              ],
+          },
+          {
+              when: 'THIS MONTH',
+              messages: [
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
+              ],
+          },
+      ];
+
       document.addEventListener('WebComponentsReady', function() {
         document.getElementById('menu-button').addEventListener('click', function() {
           document.getElementById('nav-drawer').toggle();
         });
+
+        document.getElementById('messages-template').model = messageData;
       });
     </script>
   </body>
