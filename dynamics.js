@@ -495,6 +495,8 @@ DismissController.prototype.onAnimation = function(timeStamp) {
 };
 
 function ScrollAreaToolbarController(options) {
+    this.animator = new Animator(this);
+
     this.moveCallback = options.onMove;
     this.target = options.target;
     this.scrollArea = options.scrollArea;
@@ -516,12 +518,17 @@ ScrollAreaToolbarController.prototype.onScroll = function(e) {
     var scrollDelta = scrollTop - this.scrollBase;
     var scrollDeltaFromPrevious = scrollTop - this.previousScrollTop;
     this.previousScrollTop = scrollTop;
-    var position = this.restrictToBounds(scrollDelta, 0);
+    this.position = this.restrictToBounds(scrollDelta, 0);
 
     if (sign(scrollDelta) != sign(scrollDeltaFromPrevious))
-        this.scrollBase = scrollTop - position;
+        this.scrollBase = scrollTop - this.position;
 
-    this.moveCallback.call(this.target, position);
+    this.animator.scheduleAnimation();
+};
+
+ScrollAreaToolbarController.prototype.onAnimation = function(timeStamp) {
+    this.moveCallback.call(this.target, this.position);
+    return false;
 };
 
 exports.DrawerController = DrawerController;
