@@ -117,6 +117,60 @@ body {
     });
   </script>
 </polymer-element>
+<polymer-element name="app-dismissable-list">
+  <template>
+    <content></content>
+  </template>
+  <script>
+    function transformItemUp(yPosition) {
+      var currentXTranslate = this.style.WebkitTransform.split('(')[1].split(',')[0];
+      this.style.WebkitTransform = 'translate3d(' + currentXTranslate + ',' + yPosition + 'px,0)';
+    }
+
+    Polymer('app-dismissable-list', {
+      itemsToRemove: [],
+      removeItems: function() {
+        var items = document.querySelectorAll('app-dismissable-item');
+        // To simplify the math in dismissItem, wait until all the dismiss animations are done before
+        // removing the dismissed items from the DOM.
+        for (var i = 0, len = items.length; i < len; ++i) {
+          if (items[i].animationController && !items[i].animationController.isAnimationComplete())
+            return;
+        }
+
+        this.itemsToRemove.forEach(function(item) {
+          item.remove();
+        });
+        this.itemsToRemove = [];
+
+        var items = document.querySelectorAll('app-dismissable-item');
+        for (var i = 0, len=items.length; i < len; ++i) {
+          items[i].setAnimation(null);
+          items[i].style.WebkitTransform = 'translate3d(0,0,0)';
+        }
+      },
+      dismissItem: function(item) {
+        var items = document.querySelectorAll('app-dismissable-item');
+        var index = Array.prototype.indexOf.call(items, item);
+        this.itemsToRemove.push(item);
+        var height = items[index].offsetHeight;
+
+        for (var i = index + 1, len=items.length; i < len; ++i) {
+          var currentYTranslate = parseInt(items[i].style.WebkitTransform.split(',')[1], 0);
+          var previousTarget = items[i].animationController ? items[i].animationController.targetPosition : 0;
+          items[i].setAnimation(new AnimationController({
+            onAnimate: transformItemUp.bind(items[i]),
+            onAnimateComplete: this.removeItems.bind(this),
+            duration: 200,
+            targetPosition: previousTarget - height,
+            startPosition: currentYTranslate,
+            curve: 'ease-in-out',
+          }));
+        }
+      },
+    });
+  </script>
+</polymer-element>
 <polymer-element name="app-dismissable-item">
   <template>
     <style>
@@ -130,6 +184,11 @@ body {
   </template>
   <script>
     Polymer('app-dismissable-item', {
+      setAnimation: function(animationController) {
+        if (this.animationController)
+          this.animationController.stopAnimation();
+        this.animationController = animationController;
+      },
       enteredView: function() {
         this.style.WebkitTransform = 'translate3d(0,0,0)';
         this.controller = new DismissController({
@@ -138,9 +197,15 @@ body {
             onMove: function(position) {
               var width = this.offsetWidth;
               this.style.opacity = (width - Math.abs(position)) / width;
-              this.style.WebkitTransform = 'translate3d(' + position + 'px,0,0)';
+              var currentY = this.style.WebkitTransform.split(',')[1];
+              this.style.WebkitTransform = 'translate3d(' + position + 'px,' + currentY + ',0)';
             },
             onDismiss: function(direction) {
+              if (window.location.search.indexOf('animateHeightOnDismiss') == -1) {
+                this.parentNode.dismissItem(this);
+                return;
+              }
+
               // Remove padding and set the height so that the height animation
               // goes from the current height to 0 instead of current height to
               // the padding height.

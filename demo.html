@@ -72,19 +72,21 @@ license that can be found in the LICENSE file.
                 <div class="when">
                   <div style="font-size: 14px; font-weight: bold;">{{ when }}</div>
                 </div>
-                <template repeat="{{ messages }}">
-                  <app-dismissable-item class="message">
-                    <div style="padding: 10px;">
-                      <div class="message-part subject">{{ subject }}</div>
-                      <div class="message-part small-font">
-                        <template repeat="{{ authors }}">
-                          <span class="author {{ unread ? 'unread' : '' }}">{{ name }}</span>
-                        </template>
+                <app-dismissable-list>
+                  <template repeat="{{ messages }}">
+                    <app-dismissable-item class="message">
+                      <div style="padding: 10px;">
+                        <div class="message-part subject">{{ subject }}</div>
+                        <div class="message-part small-font">
+                          <template repeat="{{ authors }}">
+                            <span class="author {{ unread ? 'unread' : '' }}">{{ name }}</span>
+                          </template>
+                        </div>
+                        <div class="message-part small-font" style="color: #999">{{ snippet }}</div>
                       </div>
-                      <div class="message-part small-font" style="color: #999">{{ snippet }}</div>
-                    </div>
-                  </app-dismissable-item>
-                </template>
+                    </app-dismissable-item>
+                  </template>
+                </app-dismissable-list>
               </div>
             </template>
           </div>
