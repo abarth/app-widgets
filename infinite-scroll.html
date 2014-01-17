@@ -1,0 +1,147 @@
+<!doctype html>
+<!--
+Copyright 2013 The Polymer Authors. All rights reserved.
+Use of this source code is governed by a BSD-style
+license that can be found in the LICENSE file.
+-->
+<html>
+  <head>
+    <title>infinite-scroll</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <style>
+      html {
+        height: 100%;
+      }
+      body {
+        display: block;
+        height: 100%;
+        margin: 0;
+      }
+      #container {
+        overflow-y: scroll;
+        height: 100%;
+        margin: 0;
+      }
+      #runway {
+        height: 100000px;
+      }
+      .item {
+        height: 100px;
+        -webkit-transform: translate3d(0,0,0);
+        box-sizing: border-box;
+        border-bottom: 1px solid gray;
+      }
+
+      .message {
+        box-sizing: border-box;
+        padding: 4px;
+        padding-left: 77px;
+        line-height: 167%;
+        cursor: default;
+        background-color: white;
+        position: relative;
+        color: black;
+        background-repeat: no-repeat;
+        background-position: 10px 10px;
+        background-size: 60px;
+        border-bottom: 1px solid #ddd;
+      }
+      
+      .from {
+        display: inline;
+        font-weight: bold;
+      }
+      
+      .timestamp {
+        margin-left: 10px;
+        font-size: 12px;
+        opacity: 0.8;
+      }
+      
+      .body {
+        font-size: 12px;
+        opacity: 0.8;
+        /*white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;*/
+      }
+      
+      .subject {
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="runway">
+        <template>
+          <div class="item message">Item 0
+            <span class="from">Banana, orange</span>
+            <span class="timestamp">What time is it?</span>
+            <div class="body">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry.</div>
+          </div>
+        </template>
+      </div>
+    </div>
+    <script>
+      "use strict";
+      (function(exports) {
+        var kHeight = 100;
+        var kPhysicalCount = 30;
+
+        var container = document.getElementById('container');
+        var runway = document.getElementById('runway');
+
+        var template = runway.querySelector('template');
+        var items = new Array(kPhysicalCount);
+        for (var i = 0; i < kPhysicalCount; ++i) {
+          var fragment = template.content.cloneNode(true);
+          runway.appendChild(fragment);
+          var item = runway.lastElementChild;
+          items[i] = item;
+          item.transformValue_ = 0;
+          updateText(item, i);
+        }
+
+        var physicalHeight = kHeight * kPhysicalCount;
+
+        function updateText(item, index) {
+          item.firstChild.nodeValue = 'Item ' + index;
+        }
+
+        container.addEventListener('scroll', function(e) {
+          var scrollTop = container.scrollTop;
+
+          var firstVirtualIndex = Math.floor(scrollTop / kHeight);
+          var firstPhysicalIndex = firstVirtualIndex % kPhysicalCount;
+
+          var baseVirtualIndex = firstVirtualIndex - firstPhysicalIndex;
+
+          var baseTransformValue = kHeight * baseVirtualIndex;
+          var nextTransformValue = baseTransformValue + physicalHeight;
+
+          var baseTransformString = 'translate3d(0,' + baseTransformValue + 'px,0)';
+          var nextTransformString = 'translate3d(0,' + nextTransformValue + 'px,0)';
+
+          window.requestAnimationFrame(function() {
+            for (var i = 0; i < firstPhysicalIndex; ++i) {
+              var item = items[i];
+              if (item.transformValue_ != nextTransformValue) {
+                updateText(item, baseVirtualIndex + kPhysicalCount + i);
+                item.style.WebkitTransform = nextTransformString;
+              }
+              item.transformValue_ = nextTransformValue;
+            }
+            for (var i = firstPhysicalIndex; i < kPhysicalCount; ++i) {
+              var item = items[i];
+              if (item.transformValue_ != baseTransformValue) {
+                updateText(item, baseVirtualIndex + i);
+                item.style.WebkitTransform = baseTransformString;
+              }
+              item.transformValue_ = baseTransformValue;
+            }
+          });
+        });
+      })(window);
+    </script>
+  </body>
+</html>
