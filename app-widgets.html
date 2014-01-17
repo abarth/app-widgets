@@ -123,18 +123,19 @@ body {
   </template>
   <script>
     function transformItemUp(yPosition) {
-      var currentXTranslate = this.style.WebkitTransform.split('(')[1].split(',')[0];
+      // FIXME: Use getComputedStyle here. Will that put us in a bad set-style/recalcStyle loop?
+      var currentXTranslate = this.style.WebkitTransform ? this.style.WebkitTransform.split('(')[1].split(',')[0] : 0;
       this.style.WebkitTransform = 'translate3d(' + currentXTranslate + ',' + yPosition + 'px,0)';
     }
 
     Polymer('app-dismissable-list', {
       itemsToRemove: [],
       removeItems: function() {
-        var items = document.querySelectorAll('app-dismissable-item');
         // To simplify the math in dismissItem, wait until all the dismiss animations are done before
         // removing the dismissed items from the DOM.
-        for (var i = 0, len = items.length; i < len; ++i) {
-          if (items[i].animationController && !items[i].animationController.isAnimationComplete())
+        for (var i = 0, len = this.childNodes.length; i < len; ++i) {
+          var item = this.childNodes[i];
+          if (item.animationController && !item.animationController.isAnimationComplete())
             return;
         }
 
@@ -143,29 +144,42 @@ body {
         });
         this.itemsToRemove = [];
 
-        var items = document.querySelectorAll('app-dismissable-item');
-        for (var i = 0, len=items.length; i < len; ++i) {
-          items[i].setAnimation(null);
-          items[i].style.WebkitTransform = 'translate3d(0,0,0)';
+        for (var i = 0, len=this.childNodes.length; i < len; ++i) {
+          var item = this.childNodes[i];
+          // Skip text nodes.
+          if (!item.style)
+            continue;
+          if (item.animationController)
+            item.animationController.stopAnimation();
+          item.animationController = null;
+          item.style.WebkitTransform = 'translate3d(0,0,0)';
         }
       },
       dismissItem: function(item) {
-        var items = document.querySelectorAll('app-dismissable-item');
-        var index = Array.prototype.indexOf.call(items, item);
+        var index = Array.prototype.indexOf.call(this.childNodes, item);
         this.itemsToRemove.push(item);
-        var height = items[index].offsetHeight;
+        var height = this.childNodes[index].offsetHeight;
 
-        for (var i = index + 1, len=items.length; i < len; ++i) {
-          var currentYTranslate = parseInt(items[i].style.WebkitTransform.split(',')[1], 0);
-          var previousTarget = items[i].animationController ? items[i].animationController.targetPosition : 0;
-          items[i].setAnimation(new AnimationController({
-            onAnimate: transformItemUp.bind(items[i]),
+        for (var i = index + 1, len=this.childNodes.length; i < len; ++i) {
+          var item = this.childNodes[i];
+          // Skip text nodes.
+          if (!item.style)
+            continue;
+          // FIXME: Use getComputedStyle here.
+          var currentYTranslate = item.style.WebkitTransform ? parseInt(item.style.WebkitTransform.split(',')[1], 0) : 0;
+          var previousTarget = item.animationController ? item.animationController.targetPosition : 0;
+
+          if (item.animationController)
+            item.animationController.stopAnimation();
+
+          item.animationController = new AnimationController({
+            onAnimate: transformItemUp.bind(item),
             onAnimateComplete: this.removeItems.bind(this),
             duration: 200,
             targetPosition: previousTarget - height,
             startPosition: currentYTranslate,
             curve: 'ease-in-out',
-          }));
+          });
         }
       },
     });
@@ -184,11 +198,6 @@ body {
   </template>
   <script>
     Polymer('app-dismissable-item', {
-      setAnimation: function(animationController) {
-        if (this.animationController)
-          this.animationController.stopAnimation();
-        this.animationController = animationController;
-      },
       enteredView: function() {
         this.style.WebkitTransform = 'translate3d(0,0,0)';
         this.controller = new DismissController({

@@ -51,9 +51,6 @@ license that can be found in the LICENSE file.
       .message {
           border-bottom: 1px solid #ccc;
       }
-      .message-group {
-          margin-bottom: 20px;
-      }
     </style>
   </head>
   <body class="polymer-ui-body-text" unresolved>
@@ -66,30 +63,26 @@ license that can be found in the LICENSE file.
       </polymer-ui-toolbar>
       <app-column>
         <app-column id="messages" scrollable>
-          <div class="padding-wrapper">
+          <app-dismissable-list class="padding-wrapper">
             <template id="messages-template" repeat>
-              <div class="message-group">
-                <div class="when">
-                  <div style="font-size: 14px; font-weight: bold;">{{ when }}</div>
-                </div>
-                <app-dismissable-list>
-                  <template repeat="{{ messages }}">
-                    <app-dismissable-item class="message">
-                      <div style="padding: 10px;">
-                        <div class="message-part subject">{{ subject }}</div>
-                        <div class="message-part small-font">
-                          <template repeat="{{ authors }}">
-                            <span class="author {{ unread ? 'unread' : '' }}">{{ name }}</span>
-                          </template>
-                        </div>
-                        <div class="message-part small-font" style="color: #999">{{ snippet }}</div>
-                      </div>
-                    </app-dismissable-item>
-                  </template>
-                </app-dismissable-list>
+              <div class="when">
+                <div style="font-size: 14px; font-weight: bold;">{{ when }}</div>
               </div>
+              <template repeat="{{ messages }}">
+                <app-dismissable-item class="message">
+                  <div style="padding: 10px;">
+                    <div class="message-part subject">{{ subject }}</div>
+                    <div class="message-part small-font">
+                      <template repeat="{{ authors }}">
+                        <span class="author {{ unread ? 'unread' : '' }}">{{ name }}</span>
+                      </template>
+                    </div>
+                    <div class="message-part small-font" style="color: #999">{{ snippet }}</div>
+                  </div>
+                </app-dismissable-item>
+              </template>
             </template>
-          </div>
+          </app-dismissable-list>
         </app-column>
         <app-scrollarea-toolbar for="messages">
           <polymer-ui-toolbar theme="polymer-ui-dark-theme">
