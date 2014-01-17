@@ -7,6 +7,7 @@ license that can be found in the LICENSE file.
 <html>
   <head>
     <title>infinite-scroll</title>
+    <script src="bower_components/platform/platform.js"></script>
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <style>
       html {
@@ -96,7 +97,7 @@ license that can be found in the LICENSE file.
   <body>
     <div id="container">
       <div id="runway">
-        <template>
+        <template repeat>
           <div class="item conversation">
             <div class="avatar">A</div>
             <div class="summary">
@@ -145,7 +146,6 @@ license that can be found in the LICENSE file.
             subject: getRandomItem(possibleSubjects),
             snippet: getRandomItem(possibleSnippets),
           }
-          console.log(data[i]);
         }
         return data;
       }
@@ -161,29 +161,35 @@ license that can be found in the LICENSE file.
         var runway = document.getElementById('runway');
 
         var template = runway.querySelector('template');
-        var items = new Array(kPhysicalCount);
+
+        var physicalData = new Array(kPhysicalCount);
         for (var i = 0; i < kPhysicalCount; ++i) {
-          var fragment = template.content.cloneNode(true);
-          runway.appendChild(fragment);
-          var item = runway.lastElementChild;
+          physicalData[i] = {};
+        }
+
+        template.model = physicalData;
+        if (window.Platform)
+          Platform.performMicrotaskCheckpoint();
+
+        var keys = Object.getOwnPropertyNames(data[0]);
+
+        var items = new Array(kPhysicalCount);
+        for (var i = 0, item = template.nextElementSibling; item && i < kPhysicalCount; ++i, item = item.nextElementSibling) {
           items[i] = item;
           item.transformValue_ = 0;
-          item.participants_ = item.querySelector('.participants').firstChild;
-          item.time_ = item.querySelector('.time').firstChild;
-          item.subject_ = item.querySelector('.subject').firstChild;
-          item.snippet_ = item.querySelector('.snippet').firstChild;
-
-          updateText(item, i);
+          updateText(i, i);
+          console.log(item);
         }
 
         var physicalHeight = kHeight * kPhysicalCount;
 
-        function updateText(item, index) {
-          var datum = data[index % data.length];
-          item.participants_.nodeValue = datum.participants;
-          item.time_.nodeValue = datum.time;
-          item.subject_.nodeValue = datum.subject;
-          item.snippet_.nodeValue = datum.snippet;
+        function updateText(virtualIndex, physicalIndex) {
+          var virtualDatum = data[virtualIndex % data.length];
+          var physicalDatum = physicalData[physicalIndex];
+          for (var i = 0; i < keys.length; ++i) {
+            var prop = keys[i];
+            physicalDatum[prop] = virtualDatum[prop];
+          }
         }
 
         container.addEventListener('scroll', function(e) {
@@ -204,7 +210,7 @@ license that can be found in the LICENSE file.
             for (var i = 0; i < firstPhysicalIndex; ++i) {
               var item = items[i];
               if (item.transformValue_ != nextTransformValue) {
-                updateText(item, baseVirtualIndex + kPhysicalCount + i);
+                updateText(baseVirtualIndex + kPhysicalCount + i, i);
                 item.style.WebkitTransform = nextTransformString;
               }
               item.transformValue_ = nextTransformValue;
@@ -212,11 +218,14 @@ license that can be found in the LICENSE file.
             for (var i = firstPhysicalIndex; i < kPhysicalCount; ++i) {
               var item = items[i];
               if (item.transformValue_ != baseTransformValue) {
-                updateText(item, baseVirtualIndex + i);
+                updateText(baseVirtualIndex + i, i);
                 item.style.WebkitTransform = baseTransformString;
               }
               item.transformValue_ = baseTransformValue;
             }
+
+            if (window.Platform)
+              Platform.performMicrotaskCheckpoint();
           });
         });
       })(window);
