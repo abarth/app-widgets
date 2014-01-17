@@ -26,47 +26,70 @@ license that can be found in the LICENSE file.
         height: 100000px;
       }
       .item {
-        height: 100px;
         -webkit-transform: translate3d(0,0,0);
         box-sizing: border-box;
-        border-bottom: 1px solid gray;
+        overflow: hidden;
       }
 
-      .message {
-        box-sizing: border-box;
-        padding: 4px;
-        padding-left: 77px;
-        line-height: 167%;
-        cursor: default;
-        background-color: white;
-        position: relative;
-        color: black;
-        background-repeat: no-repeat;
-        background-position: 10px 10px;
-        background-size: 60px;
-        border-bottom: 1px solid #ddd;
+      .conversation {
+        font-family: sans-serif;
+        height: 70px;
+        display: flex;
+        border-bottom: 1px solid lightgray;
       }
-      
-      .from {
-        display: inline;
+      .avatar {
+        display: flex;
+        flex-shrink: 0;
+        color: white;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        width: 50px;
+        height: 50px;
+        margin: 10px;
+        background-color: lightblue;
+      }
+      .summary {
+        flex: 1;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 10px 10px 10px 0px;
+      }
+      .topline {
+        display: flex;
+        flex-shrink: 0;
+      }
+      .participants {
+        flex: 1;
+        flex-shrink: 0;
         font-weight: bold;
       }
-      
-      .timestamp {
-        margin-left: 10px;
+      .time {
+        flex-shrink: 0;
         font-size: 12px;
-        opacity: 0.8;
+        color: #444;
       }
-      
-      .body {
+      .bottomline {
+        flex-shrink: 0;
+        display: flex;
+      }
+      .preview {
+        flex: 1;
+        flex-shrink: 0;
         font-size: 12px;
-        opacity: 0.8;
-        /*white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;*/
+        height: 2em;
+        text-overflow: ellipsis;
       }
-      
       .subject {
+        font-weight: bold;
+      }
+      .snippet {
+        color: #444;
+      }
+      .trinkets {
+        flex-shrink: 0;
+        font-size: 20px;
       }
     </style>
   </head>
@@ -74,18 +97,64 @@ license that can be found in the LICENSE file.
     <div id="container">
       <div id="runway">
         <template>
-          <div class="item message">Item 0
-            <span class="from">Banana, orange</span>
-            <span class="timestamp">What time is it?</span>
-            <div class="body">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum is simply dummy text of the printing and typesetting industry.</div>
+          <div class="item conversation">
+            <div class="avatar">A</div>
+            <div class="summary">
+              <div class="topline">
+                <div class="participants">{{ participants }}</div>
+                <div class="time">{{ time }}</div>
+              </div>
+              <div class="bottomline">
+                <div class="preview"><span class="subject">{{ subject }}</span> &mdash;
+                  <span class="snippet">{{ snippet }}</span></div>
+                <div class="trinkets">&#x2606;</div>
+              </div>
+            </div>
           </div>
         </template>
       </div>
     </div>
     <script>
+      function getRandomItem(array) {
+        return array[Math.floor(Math.random() * array.length)];
+      }
+      function generateFakeData() {
+        var kNumberOfItems = 500;
+        var possibleParticipants = [
+          'Adam', 'Ojan', 'Elliot', 'Chris',
+        ];
+        var possibleTimes = [
+          'Now', 'Yesterday', 'Last week',
+        ];
+        var possibleSubjects = [
+          'Do you even bench?',
+          'I like to scroll forever',
+          'Lunch',
+          'What if my subject is really long? Longer than that. Like really, really, long?',
+        ];
+        var possibleSnippets = [
+          'Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.',
+          'When, in disgrace with fortune and men\'s eyes, I all alone beweep my outcast state,',
+          'We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility',
+        ];
+        var data = new Array(kNumberOfItems);
+        for (var i = 0; i < kNumberOfItems; ++i) {
+          data[i] = {
+            participants: getRandomItem(possibleParticipants),
+            time: getRandomItem(possibleTimes),
+            subject: getRandomItem(possibleSubjects),
+            snippet: getRandomItem(possibleSnippets),
+          }
+          console.log(data[i]);
+        }
+        return data;
+      }
+
+      var data = generateFakeData();
+
       "use strict";
       (function(exports) {
-        var kHeight = 100;
+        var kHeight = 70;
         var kPhysicalCount = 30;
 
         var container = document.getElementById('container');
@@ -99,13 +168,22 @@ license that can be found in the LICENSE file.
           var item = runway.lastElementChild;
           items[i] = item;
           item.transformValue_ = 0;
+          item.participants_ = item.querySelector('.participants').firstChild;
+          item.time_ = item.querySelector('.time').firstChild;
+          item.subject_ = item.querySelector('.subject').firstChild;
+          item.snippet_ = item.querySelector('.snippet').firstChild;
+
           updateText(item, i);
         }
 
         var physicalHeight = kHeight * kPhysicalCount;
 
         function updateText(item, index) {
-          item.firstChild.nodeValue = 'Item ' + index;
+          var datum = data[index % data.length];
+          item.participants_.nodeValue = datum.participants;
+          item.time_.nodeValue = datum.time;
+          item.subject_.nodeValue = datum.subject;
+          item.snippet_.nodeValue = datum.snippet;
         }
 
         container.addEventListener('scroll', function(e) {
