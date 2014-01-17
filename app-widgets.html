@@ -123,7 +123,6 @@ body {
   </template>
   <script>
     function transformItemUp(yPosition) {
-      // FIXME: Use getComputedStyle here. Will that put us in a bad set-style/recalcStyle loop?
       var currentXTranslate = this.style.WebkitTransform ? this.style.WebkitTransform.split('(')[1].split(',')[0] : 0;
       this.style.WebkitTransform = 'translate3d(' + currentXTranslate + ',' + yPosition + 'px,0)';
     }
@@ -165,7 +164,7 @@ body {
           // Skip text nodes.
           if (!item.style)
             continue;
-          // FIXME: Use getComputedStyle here.
+
           var currentYTranslate = item.style.WebkitTransform ? parseInt(item.style.WebkitTransform.split(',')[1], 0) : 0;
           var previousTarget = item.animationController ? item.animationController.targetPosition : 0;
 
