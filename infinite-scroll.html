@@ -25,11 +25,13 @@ license that can be found in the LICENSE file.
       }
       #runway {
         height: 100000px;
+        background-color: red;
       }
       .item {
         -webkit-transform: translate3d(0,0,0);
         box-sizing: border-box;
         overflow: hidden;
+        background-color: white;
       }
 
       .conversation {
@@ -99,7 +101,7 @@ license that can be found in the LICENSE file.
       <div id="runway">
         <template repeat>
           <div class="item conversation">
-            <div class="avatar">A</div>
+            <div class="avatar" style="background-color: {{ avatarColor }}">{{ avatarLetter }}</div>
             <div class="summary">
               <div class="topline">
                 <div class="participants">{{ participants }}</div>
@@ -119,7 +121,7 @@ license that can be found in the LICENSE file.
       (function(exports) {
         "use strict";
 
-        var kPhysicalCount = 30;
+        var kPhysicalCount = 60;
 
         function ScrollingEngine(options) {
           this.height_ = options.height;
@@ -148,8 +150,8 @@ license that can be found in the LICENSE file.
             this.updateItem_(i, i);
           }
 
-
           this.physicalHeight_ = this.height_ * kPhysicalCount;
+          this.visibleItemCount_ = Math.ceil(this.container_.offsetHeight / this.height_);
 
           var self = this;
           this.container_.addEventListener('scroll', function(e) {
@@ -170,10 +172,13 @@ license that can be found in the LICENSE file.
         ScrollingEngine.prototype.onScroll_ = function(e) {
           var scrollTop = this.container_.scrollTop;
 
-          var firstVirtualIndex = Math.floor(scrollTop / this.height_);
-          var firstPhysicalIndex = firstVirtualIndex % kPhysicalCount;
+          var firstVisibleIndex = Math.floor(scrollTop / this.height_);
+          var visibleMidpoint = firstVisibleIndex + this.visibleItemCount_ / 2;
 
-          var baseVirtualIndex = firstVirtualIndex - firstPhysicalIndex;
+          var firstReifiedIndex = Math.max(0, Math.floor(visibleMidpoint - kPhysicalCount / 2));
+
+          var firstPhysicalIndex = firstReifiedIndex % kPhysicalCount;
+          var baseVirtualIndex = firstReifiedIndex - firstPhysicalIndex;
 
           var baseTransformValue = this.height_ * baseVirtualIndex;
           var nextTransformValue = baseTransformValue + this.physicalHeight_;
@@ -216,8 +221,11 @@ license that can be found in the LICENSE file.
         }
         function generateFakeData() {
           var kNumberOfItems = 500;
+          var possibleAvatarColors = [
+            'BurlyWood', 'green', 'orange', 'salmon', 'lightblue', 'BlueViolet', 'DarkSeaGreen',
+          ];
           var possibleParticipants = [
-            'Adam', 'Ojan', 'Elliot', 'Chris',
+            'Adam', 'Ojan', 'Elliott', 'Chris',
           ];
           var possibleTimes = [
             'Now', 'Yesterday', 'Last week',
@@ -236,11 +244,13 @@ license that can be found in the LICENSE file.
           var data = new Array(kNumberOfItems);
           for (var i = 0; i < kNumberOfItems; ++i) {
             data[i] = {
+              avatarColor: getRandomItem(possibleAvatarColors),
               participants: getRandomItem(possibleParticipants),
               time: getRandomItem(possibleTimes),
               subject: getRandomItem(possibleSubjects),
               snippet: getRandomItem(possibleSnippets),
-            }
+            };
+            data[i].avatarLetter = data[i].participants[0].toUpperCase();
           }
           return data;
         }
