@@ -14,11 +14,8 @@ license that can be found in the LICENSE file.
     <link rel="import" href="bower_components/polymer-ui-menu-item/polymer-ui-menu-item.html">
     <link rel="import" href="bower_components/polymer-ui-toolbar/polymer-ui-toolbar.html">
     <link rel="import" href="bower_components/polymer-ui-icon-button/polymer-ui-icon-button.html">
+    <script src="data.js"></script>
     <style>
-      .message {
-        background-color: white;
-        border-bottom: 1px solid lightgray;
-      }
       #messages {
         background-color: darkgrey;
       }
@@ -26,30 +23,70 @@ license that can be found in the LICENSE file.
         padding: 60px 0;
         flex-shrink: 0;
       }
-      .when {
-        padding: 16px;
-        align-items: center;
-        background-color: #aad;
+      .item {
+        box-sizing: border-box;
+        overflow: hidden;
+        background-color: white;
       }
-      .message-part {
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          margin: 2px;
+      .conversation {
+        font-family: sans-serif;
+        height: 70px;
+        display: flex;
+        border-bottom: 1px solid lightgray;
+      }
+      .avatar {
+        display: flex;
+        flex-shrink: 0;
+        color: white;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        width: 50px;
+        height: 50px;
+        margin: 10px;
+        background-color: lightblue;
+      }
+      .summary {
+        flex: 1;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        padding: 10px 10px 10px 0px;
+      }
+      .topline {
+        display: flex;
+        flex-shrink: 0;
+      }
+      .participants {
+        flex: 1;
+        flex-shrink: 0;
+        font-weight: bold;
+      }
+      .time {
+        flex-shrink: 0;
+        font-size: 12px;
+        color: #444;
+      }
+      .bottomline {
+        flex-shrink: 0;
+        display: flex;
+      }
+      .preview {
+        flex: 1;
+        flex-shrink: 0;
+        font-size: 12px;
+        height: 2em;
+        text-overflow: ellipsis;
       }
       .subject {
         font-weight: bold;
       }
-      .small-font {
-          font-size: 14px;
+      .snippet {
+        color: #444;
       }
-      .unread {
-          font-weight: bold;
-      }
-      .when {
-          color: #555;
-      }
-      .message {
-          border-bottom: 1px solid #ccc;
+      .trinkets {
+        flex-shrink: 0;
+        font-size: 20px;
       }
     </style>
   </head>
@@ -62,28 +99,26 @@ license that can be found in the LICENSE file.
         <polymer-ui-icon-button icon="add"></polymer-ui-icon-button>
       </polymer-ui-toolbar>
       <app-column>
-        <app-column id="messages" scrollable>
+        <app-list id="messages">
           <app-dismissable-list class="padding-wrapper">
-            <template id="messages-template" repeat>
-              <div class="when">
-                <div style="font-size: 14px; font-weight: bold;">{{ when }}</div>
-              </div>
-              <template repeat="{{ messages }}">
-                <app-dismissable-item class="message">
-                  <div style="padding: 10px;">
-                    <div class="message-part subject">{{ subject }}</div>
-                    <div class="message-part small-font">
-                      <template repeat="{{ authors }}">
-                        <span class="author {{ unread ? 'unread' : '' }}">{{ name }}</span>
-                      </template>
-                    </div>
-                    <div class="message-part small-font" style="color: #999">{{ snippet }}</div>
+            <template repeat>
+              <app-dismissable-item class="item conversation">
+                <div class="avatar" style="background-color: {{ avatarColor }}">{{ avatarLetter }}</div>
+                <div class="summary">
+                  <div class="topline">
+                    <div class="participants">{{ participants }}</div>
+                    <div class="time">{{ time }}</div>
                   </div>
-                </app-dismissable-item>
-              </template>
+                  <div class="bottomline">
+                    <div class="preview"><span class="subject">{{ subject }}</span> &mdash;
+                      <span class="snippet">{{ snippet }}</span></div>
+                    <div class="trinkets">&#x2606;</div>
+                  </div>
+                </div>
+              </app-dismissable-item>
             </template>
           </app-dismissable-list>
-        </app-column>
+        </app-list>
         <app-scrollarea-toolbar for="messages">
           <polymer-ui-toolbar theme="polymer-ui-dark-theme">
             <polymer-ui-icon-button icon="add" flex></polymer-ui-icon-button>
@@ -133,45 +168,10 @@ license that can be found in the LICENSE file.
       </app-column>
     </app-frame>
     <script>
-      var messageData = [
-          {
-              when: 'TODAY',
-              messages: [
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-              ],
-          },
-          {
-              when: 'YESTERDAY',
-              messages: [
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-              ],
-          },
-          {
-              when: 'THIS MONTH',
-              messages: [
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-                  { subject: 'Subject of mail', authors: [{name: 'me', unread: false}, {name: 'adam', unread: true}], snippet: 'This is the beginning of the message.' },
-              ],
-          },
-      ];
-
       document.addEventListener('WebComponentsReady', function() {
         document.getElementById('menu-button').addEventListener('click', function() {
           document.getElementById('nav-drawer').toggle();
         });
-
-        document.getElementById('messages-template').model = messageData;
       });
     </script>
   </body>
