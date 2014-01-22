@@ -304,11 +304,15 @@ body {
     Polymer('app-list', {
       data: null,
       enteredView: function() {
+        var template = this.querySelector('template');
         this.engine = new ScrollingEngine({
           height: 70,
           container: this,
-          template: this.querySelector('template'),
-          dataProvider: getTheData,
+          template: template,
+          dataProvider: function(i) {
+            // TODO(abarth): We should get data from this.data rather than from the global fakeData.
+            return fakeData[i % fakeData.length];
+          },
         });
       },
     });
