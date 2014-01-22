@@ -297,8 +297,6 @@ body {
         display: block;
         overflow-y: scroll;
       }
-      #runway {
-      }
     </style>
     <div id="runway">
       <content></content>
@@ -310,13 +308,11 @@ body {
       count: 500,
       enteredView: function() {
         this.$.runway.style.height = this.height * this.count + 'px';
-
-        var template = this.querySelector('template');
         this.engine = new ScrollingEngine({
           height: this.height,
           count: this.count,
           container: this,
-          template: template,
+          template: this.querySelector('template'),
           dataProvider: function(i) {
             // TODO(abarth): We should get data from this.data rather than from the global fakeData.
             return fakeData[i % fakeData.length];

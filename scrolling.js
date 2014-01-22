@@ -2,17 +2,23 @@
 
 (function(exports) {
 
-var kPhysicalCount = 10;
+var kPhysicalRunway = 10;
 
 function ScrollingEngine(options) {
   this.height_ = options.height;
   this.count_ = options.count;
+
   this.dataProvider_ = options.dataProvider;
   this.template_ = options.template;
   this.container_ = options.container;
 
-  this.physicalData_ = new Array(kPhysicalCount);
-  for (var i = 0; i < kPhysicalCount; ++i)
+  this.visibleCount_ = Math.ceil(this.container_.offsetHeight / this.height_);
+  this.physicalCount_ = this.visibleCount_ + kPhysicalRunway;
+
+  this.physicalHeight_ = this.height_ * this.physicalCount_;
+
+  this.physicalData_ = new Array(this.physicalCount_);
+  for (var i = 0; i < this.physicalCount_; ++i)
     this.physicalData_[i] = {};
   var exampleDatum = this.dataProvider_(0);
   this.propertyNames_ = Object.getOwnPropertyNames(exampleDatum);
@@ -23,17 +29,14 @@ function ScrollingEngine(options) {
   if (window.Platform)
     Platform.performMicrotaskCheckpoint();
 
-  this.physicalItems_ = new Array(kPhysicalCount);
+  this.physicalItems_ = new Array(this.physicalCount_);
   for (var i = 0, item = this.template_.nextElementSibling;
-       item && i < kPhysicalCount;
+       item && i < this.physicalCount_;
        ++i, item = item.nextElementSibling) {
     this.physicalItems_[i] = item;
     item.transformValue_ = 0;
     this.updateItem_(i, i);
   }
-
-  this.physicalHeight_ = this.height_ * kPhysicalCount;
-  this.visibleItemCount_ = Math.ceil(this.container_.offsetHeight / this.height_);
 
   var self = this;
   this.container_.addEventListener('scroll', function(e) {
@@ -55,12 +58,12 @@ ScrollingEngine.prototype.onScroll_ = function(e) {
   var scrollTop = this.container_.scrollTop;
 
   var firstVisibleIndex = Math.floor(scrollTop / this.height_);
-  var visibleMidpoint = firstVisibleIndex + this.visibleItemCount_ / 2;
+  var visibleMidpoint = firstVisibleIndex + this.visibleCount_ / 2;
 
-  var firstReifiedIndex = Math.max(0, Math.floor(visibleMidpoint - kPhysicalCount / 2));
-  firstReifiedIndex = Math.min(firstReifiedIndex, this.count_ - kPhysicalCount);
+  var firstReifiedIndex = Math.max(0, Math.floor(visibleMidpoint - this.physicalCount_ / 2));
+  firstReifiedIndex = Math.min(firstReifiedIndex, this.count_ - this.physicalCount_);
 
-  var firstPhysicalIndex = firstReifiedIndex % kPhysicalCount;
+  var firstPhysicalIndex = firstReifiedIndex % this.physicalCount_;
   var baseVirtualIndex = firstReifiedIndex - firstPhysicalIndex;
 
   var baseTransformValue = this.height_ * baseVirtualIndex;
@@ -74,12 +77,12 @@ ScrollingEngine.prototype.onScroll_ = function(e) {
     for (var i = 0; i < firstPhysicalIndex; ++i) {
       var item = self.physicalItems_[i];
       if (item.transformValue_ != nextTransformValue) {
-        self.updateItem_(baseVirtualIndex + kPhysicalCount + i, i);
+        self.updateItem_(baseVirtualIndex + self.physicalCount_ + i, i);
         item.style.WebkitTransform = nextTransformString;
       }
       item.transformValue_ = nextTransformValue;
     }
-    for (var i = firstPhysicalIndex; i < kPhysicalCount; ++i) {
+    for (var i = firstPhysicalIndex; i < self.physicalCount_; ++i) {
       var item = self.physicalItems_[i];
       if (item.transformValue_ != baseTransformValue) {
         self.updateItem_(baseVirtualIndex + i, i);
