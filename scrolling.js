@@ -6,6 +6,7 @@ var kPhysicalCount = 10;
 
 function ScrollingEngine(options) {
   this.height_ = options.height;
+  this.count_ = options.count;
   this.dataProvider_ = options.dataProvider;
   this.template_ = options.template;
   this.container_ = options.container;
@@ -57,6 +58,7 @@ ScrollingEngine.prototype.onScroll_ = function(e) {
   var visibleMidpoint = firstVisibleIndex + this.visibleItemCount_ / 2;
 
   var firstReifiedIndex = Math.max(0, Math.floor(visibleMidpoint - kPhysicalCount / 2));
+  firstReifiedIndex = Math.min(firstReifiedIndex, this.count_ - kPhysicalCount);
 
   var firstPhysicalIndex = firstReifiedIndex % kPhysicalCount;
   var baseVirtualIndex = firstReifiedIndex - firstPhysicalIndex;

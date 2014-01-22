@@ -290,7 +290,7 @@ body {
     });
   </script>
 </polymer-element>
-<polymer-element name="app-list" attributes="data">
+<polymer-element name="app-list" attributes="height count">
   <template>
     <style>
       :host {
@@ -298,7 +298,6 @@ body {
         overflow-y: scroll;
       }
       #runway {
-        height: 100000px;
       }
     </style>
     <div id="runway">
@@ -307,11 +306,15 @@ body {
   </template>
   <script>
     Polymer('app-list', {
-      data: null,
+      height: 70,
+      count: 500,
       enteredView: function() {
+        this.$.runway.style.height = this.height * this.count + 'px';
+
         var template = this.querySelector('template');
         this.engine = new ScrollingEngine({
-          height: 70,
+          height: this.height,
+          count: this.count,
           container: this,
           template: template,
           dataProvider: function(i) {

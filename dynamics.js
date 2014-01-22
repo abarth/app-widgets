@@ -501,9 +501,13 @@ function ScrollAreaToolbarController(options) {
     this.target = options.target;
     this.scrollArea = options.scrollArea;
 
-    this.scrollArea.addEventListener("scroll", this.onScroll.bind(this));
     this.scrollBase = 0;
     this.previousScrollTop = 0;
+
+    var self = this;
+    this.scrollArea.addEventListener('scroll', function(e) {
+        self.onScroll(e);
+    });
 };
 
 ScrollAreaToolbarController.prototype.restrictToBounds = function(position) {
