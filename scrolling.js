@@ -55,6 +55,10 @@ ScrollingEngine.prototype.updateItem_ = function(virtualIndex, physicalIndex) {
 };
 
 ScrollingEngine.prototype.onScroll_ = function(e) {
+  this.refresh_(false);
+}
+
+ScrollingEngine.prototype.refresh_ = function(force) {
   var scrollTop = this.container_.scrollTop;
 
   var firstVisibleIndex = Math.floor(scrollTop / this.height_);
@@ -76,7 +80,7 @@ ScrollingEngine.prototype.onScroll_ = function(e) {
   window.requestAnimationFrame(function() {
     for (var i = 0; i < firstPhysicalIndex; ++i) {
       var item = self.physicalItems_[i];
-      if (item.transformValue_ != nextTransformValue) {
+      if (force || item.transformValue_ != nextTransformValue) {
         self.updateItem_(baseVirtualIndex + self.physicalCount_ + i, i);
         item.style.WebkitTransform = nextTransformString;
       }
@@ -84,7 +88,7 @@ ScrollingEngine.prototype.onScroll_ = function(e) {
     }
     for (var i = firstPhysicalIndex; i < self.physicalCount_; ++i) {
       var item = self.physicalItems_[i];
-      if (item.transformValue_ != baseTransformValue) {
+      if (force || item.transformValue_ != baseTransformValue) {
         self.updateItem_(baseVirtualIndex + i, i);
         item.style.WebkitTransform = baseTransformString;
       }

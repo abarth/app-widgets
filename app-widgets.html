@@ -129,57 +129,77 @@ body {
     <content></content>
   </template>
   <script>
-    function transformItemUp(yPosition) {
-      var currentXTranslate = this.style.WebkitTransform ? this.style.WebkitTransform.split('(')[1].split(',')[0] : 0;
-      this.style.WebkitTransform = 'translate3d(' + currentXTranslate + ',' + yPosition + 'px,0)';
+    function getTransformValue(item) {
+      return item.transformValue_ || 0;
     }
 
     Polymer('app-dismissable-list', {
       itemsToRemove: [],
+      onItemAnimate: function(item, position) {
+        item.style.WebkitTransform = 'translate3d(0,' + position + 'px,0)';
+      },
       removeItems: function() {
         // To simplify the math in dismissItem, wait until all the dismiss animations are done before
         // removing the dismissed items from the DOM.
-        for (var i = 0, len = this.childNodes.length; i < len; ++i) {
-          var item = this.childNodes[i];
+        for (var i = 0, len = this.children.length; i < len; ++i) {
+          var item = this.children[i];
           if (item.animationController && !item.animationController.isAnimationComplete())
             return;
         }
 
+        var self = this;
         this.itemsToRemove.forEach(function(item) {
-          item.remove();
+          fakeData.some(function(element, index) {
+            if (element.id == item.id) {
+              fakeData.splice(index, 1);
+              return true;
+            }
+          })
+
+          item.style.opacity = 1;
         });
         this.itemsToRemove = [];
 
-        for (var i = 0, len=this.childNodes.length; i < len; ++i) {
-          var item = this.childNodes[i];
-          // Skip text nodes.
-          if (!item.style)
-            continue;
+        for (var i = 1, len = this.children.length; i < len; ++i) {
+          var item = this.children[i];
           if (item.animationController)
             item.animationController.stopAnimation();
           item.animationController = null;
-          item.style.WebkitTransform = 'translate3d(0,0,0)';
+          // As the scrolling state (translateValue_) isn't update
+          // the following will work.
+          item.parentElement.parentElement.engine.refresh_(true);
         }
       },
       dismissItem: function(item) {
-        var index = Array.prototype.indexOf.call(this.childNodes, item);
-        this.itemsToRemove.push(item);
-        var height = this.childNodes[index].offsetHeight;
+        var itemIndex = Array.prototype.indexOf.call(this.children, item);
+        var itemYTranslate = getTransformValue(item);
 
-        for (var i = index + 1, len=this.childNodes.length; i < len; ++i) {
-          var item = this.childNodes[i];
-          // Skip text nodes.
-          if (!item.style)
+        this.itemsToRemove.push(item);
+        var height = this.children[itemIndex].offsetHeight;
+
+        function isVisuallyAfterDismissedItem(subject, index, yTranslate) {
+          if (yTranslate > itemYTranslate)
+            return true;
+          if (yTranslate == itemYTranslate && itemIndex < index)
+            return true;
+          return false;
+        }
+
+        for (var i = 0, len = this.children.length; i < len; ++i) {
+          var item = this.children[i];
+          var currentYTranslate = getTransformValue(item);
+
+          if (!isVisuallyAfterDismissedItem(item, i, currentYTranslate))
             continue;
 
-          var currentYTranslate = item.style.WebkitTransform ? parseInt(item.style.WebkitTransform.split(',')[1], 0) : 0;
-          var previousTarget = item.animationController ? item.animationController.targetPosition : 0;
+          var previousTarget = item.animationController ?
+              item.animationController.targetPosition : currentYTranslate;
 
           if (item.animationController)
             item.animationController.stopAnimation();
 
           item.animationController = new AnimationController({
-            onAnimate: transformItemUp.bind(item),
+            onAnimate: this.onItemAnimate.bind(this, item),
             onAnimateComplete: this.removeItems.bind(this),
             duration: 200,
             targetPosition: previousTarget - height,
@@ -212,8 +232,8 @@ body {
             onMove: function(position) {
               var width = this.offsetWidth;
               this.style.opacity = (width - Math.abs(position)) / width;
-              var currentY = this.style.WebkitTransform.split(',')[1];
-              this.style.WebkitTransform = 'translate3d(' + position + 'px,' + currentY + ',0)';
+              var currentY = getTransformValue(this);
+              this.style.WebkitTransform = 'translate3d(' + position + 'px,' + currentY + 'px,0)';
             },
             onDismiss: function(direction) {
               if (window.location.search.indexOf('animateHeightOnDismiss') == -1) {
@@ -283,7 +303,7 @@ body {
           scrollArea: scrollArea,
           onMove: function(position) {
             var translateY = this.location == 'top' ? -position : position;
-            this.style.WebkitTransform = 'translate3d(0,' + translateY +'px,0)';
+            this.style.WebkitTransform = 'translate3d(0,' + translateY + 'px,0)';
           },
         });
       },

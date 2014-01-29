@@ -30,6 +30,7 @@ function generateFakeListData() {
   var data = [];
   for (var i = 0; i < kNumberOfItems; ++i) {
     data[i] = {
+      id: i,
       avatarColor: getRandomItem(possibleAvatarColors),
       participants: getRandomItem(possibleParticipants),
       time: getRandomItem(possibleTimes),
