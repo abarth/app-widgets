@@ -138,23 +138,6 @@ body {
       onItemAnimate: function(item, position) {
         item.style.WebkitTransform = 'translate3d(0,' + position + 'px,0)';
       },
-      removeItemsFromBackend: function() {
-        var self = this;
-        this.itemsToRemove.forEach(function(item) {
-          fakeData.some(function(element, index) {
-            if (element.id == item.id) {
-              fakeData.splice(index, 1);
-              return true;
-            }
-          })
-
-          item.style.opacity = '';
-        });
-        this.itemsToRemove = [];
-
-        var item = this.children[0];
-        item.parentElement.parentElement.engine.refresh_(true);
-      },
       removeItems: function() {
         // To simplify the math in dismissItem, wait until all the dismiss animations are done before
         // removing the dismissed items from the DOM.
@@ -164,13 +147,15 @@ body {
             return;
         }
 
-        this.removeItemsFromBackend();
+        this.fire('dismiss-items', { items: this.itemsToRemove });
+        this.itemsToRemove = [];
 
         for (var i = 1, len = this.children.length; i < len; ++i) {
           var item = this.children[i];
           if (item.animationController)
             item.animationController.stopAnimation();
           item.animationController = null;
+          item.style.opacity = '';
         }
       },
       dismissItem: function(item) {
@@ -250,7 +235,8 @@ body {
           var currentY = getTransformValue(item);
           item.style.WebkitTransform = 'translate3d(0,' + currentY + 'px,0)';
 
-          self.removeItemsFromBackend();
+          this.fire('dismiss-items', { items: this.itemsToRemove });
+          this.itemsToRemove = [];
         }.bind(this);
 
         item.addEventListener('webkitTransitionEnd', onTransitionEnd);
@@ -355,15 +341,12 @@ body {
       count: 500,
       enteredView: function() {
         this.$.runway.style.height = this.height * this.count + 'px';
+        this.data = new FakeDataProvider(this.count);
         this.engine = new ScrollingEngine({
           height: this.height,
-          count: this.count,
           container: this,
           template: this.querySelector('template'),
-          dataProvider: function(i) {
-            // TODO(abarth): We should get data from this.data rather than from the global fakeListData.
-            return fakeListData[i % fakeListData.length];
-          },
+          dataProvider: this.data,
         });
       },
     });

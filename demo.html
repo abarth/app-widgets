@@ -153,6 +153,10 @@ license that can be found in the LICENSE file.
             templateElement.model = fakeDrawerData;
           navDrawer.toggle();
         });
+        document.querySelector('app-dismissable-list').addEventListener('dismiss-items', function(e) {
+          var dataProvider = e.target.parentElement.data;
+          dataProvider.deleteItemByIds(e.detail.items.map(function(item) { return item.id; }));
+        });
       });
     </script>
   </body>
