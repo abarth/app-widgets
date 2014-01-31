@@ -138,15 +138,7 @@ body {
       onItemAnimate: function(item, position) {
         item.style.WebkitTransform = 'translate3d(0,' + position + 'px,0)';
       },
-      removeItems: function() {
-        // To simplify the math in dismissItem, wait until all the dismiss animations are done before
-        // removing the dismissed items from the DOM.
-        for (var i = 0, len = this.children.length; i < len; ++i) {
-          var item = this.children[i];
-          if (item.animationController && !item.animationController.isAnimationComplete())
-            return;
-        }
-
+      removeItemsFromBackend: function() {
         var self = this;
         this.itemsToRemove.forEach(function(item) {
           fakeData.some(function(element, index) {
@@ -156,18 +148,29 @@ body {
             }
           })
 
-          item.style.opacity = 1;
+          item.style.opacity = '';
         });
         this.itemsToRemove = [];
+
+        var item = this.children[0];
+        item.parentElement.parentElement.engine.refresh_(true);
+      },
+      removeItems: function() {
+        // To simplify the math in dismissItem, wait until all the dismiss animations are done before
+        // removing the dismissed items from the DOM.
+        for (var i = 0, len = this.children.length; i < len; ++i) {
+          var item = this.children[i];
+          if (item.animationController && !item.animationController.isAnimationComplete())
+            return;
+        }
+
+        this.removeItemsFromBackend();
 
         for (var i = 1, len = this.children.length; i < len; ++i) {
           var item = this.children[i];
           if (item.animationController)
             item.animationController.stopAnimation();
           item.animationController = null;
-          // As the scrolling state (translateValue_) isn't update
-          // the following will work.
-          item.parentElement.parentElement.engine.refresh_(true);
         }
       },
       dismissItem: function(item) {
@@ -208,6 +211,50 @@ body {
           });
         }
       },
+      dismissItemAnimateHeight: function(item) {
+        // FIXME: Animation doesn't work with items transformed out of
+        // their DOM order.
+
+        this.itemsToRemove.push(item);
+
+        // Remove padding and set the height so that the height animation
+        // goes from the current height to 0 instead of current height to
+        // the padding height.
+        item.style.height = item.clientHeight + 'px';
+        item.style.padding = 0;
+
+        // Empty the contents of the item to make layouts fast.
+        item.children_ = item.children;
+        item.textContent = '';
+
+        // Force a layout to get the above styling to take before the start
+        // of the animation.
+        item.offsetTop;
+
+        item.style.height = 0;
+        item.style.transition = "height 0.2s ease-in-out";
+
+        var onTransitionEnd = function() {
+          item.removeEventListener('webkitTransitionEnd', onTransitionEnd);
+
+          for (var i = 0, len=item.children_.length; i < len; ++i)
+            item.appendChild(item.children_[i]);
+          item.children_ = null;
+
+          item.style.transition = '';
+          item.style.padding = '';
+          item.style.border = '';
+          item.style.opacity = '';
+          item.style.height = '';
+
+          var currentY = getTransformValue(item);
+          item.style.WebkitTransform = 'translate3d(0,' + currentY + 'px,0)';
+
+          self.removeItemsFromBackend();
+        }.bind(this);
+
+        item.addEventListener('webkitTransitionEnd', onTransitionEnd);
+      },
     });
   </script>
 </polymer-element>
@@ -236,30 +283,10 @@ body {
               this.style.WebkitTransform = 'translate3d(' + position + 'px,' + currentY + 'px,0)';
             },
             onDismiss: function(direction) {
-              if (window.location.search.indexOf('animateHeightOnDismiss') == -1) {
+              if (window.location.search.indexOf('animateHeightOnDismiss') == -1)
                 this.parentNode.dismissItem(this);
-                return;
-              }
-
-              // Remove padding and set the height so that the height animation
-              // goes from the current height to 0 instead of current height to
-              // the padding height.
-              this.style.height = this.clientHeight + 'px';
-              this.style.padding = 0;
-
-              // Empty the contents of the item to make layouts fast.
-              this.textContent = '';
-
-              // Force a layout to get the above styling to take before the start
-              // of the animation.
-              this.offsetTop;
-
-              this.style.height = 0;
-              this.style.transition = "height 0.2s ease-in-out";
-
-              this.addEventListener('webkitTransitionEnd', function() {
-                this.remove();
-              });
+              else
+                this.parentNode.dismissItemAnimateHeight(this);
             },
         });
       },
