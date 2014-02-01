@@ -345,13 +345,16 @@ function DismissController(options) {
     this.animator = new Animator(this);
 
     this.target = options.target;
+    this.startCallback = options.onStart;
     this.moveCallback = options.onMove;
     this.dismissCallback = options.onDismiss;
+    this.canceledCallback = options.onCanceled;
     this.curve = presetTimingFunctions[options.curve || 'linear'];
 
     this.position = 0;
     this.width = 0;
     this.state = DismissController.kInitial;
+    this.ignoreTouch = true;
 
     this.target.addEventListener('touchstart', this.onTouchStart.bind(this));
     this.target.addEventListener('touchmove', this.onTouchMove.bind(this));
@@ -359,17 +362,39 @@ function DismissController(options) {
     // TODO(abarth): Handle touchcancel.
 }
 
+DismissController.kDeactivated = 'deactivated';
 DismissController.kInitial = 'initial';
 DismissController.kDragging = 'dragging';
 DismissController.kSettling = 'settling';
 DismissController.kFlinging = 'flinging';
 DismissController.kDismissed = 'dismissed';
 
-DismissController.prototype.onTouchStart = function(e) {
-    this.velocityTracker.onTouchStart(e);
+DismissController.prototype.setActive = function(active) {
+    if (!active)
+        this.state = DismissController.kDeactivated;
+    else
+        this.state = DismissController.kInitial;
+};
 
-    this.state = DismissController.kInitial;
+DismissController.prototype.onTouchStart = function(e) {
+    this.ignoreTouch = true; // Only onTouchStart can reset this.
+
+    if (this.state == DismissController.kDeactivated)
+        return;
+
+    this.ignoreTouch = false;
+
+    this.velocityTracker.onTouchStart(e);
     this.animator.stopAnimation();
+
+    if (this.state == DismissController.kInitial ||
+        this.state == DismissController.kDismissed) {
+        this.startCallback.call(this.target);
+        this.state = DismissController.kInitial;
+        this.position = 0;
+    } else {
+        this.state = DismissController.kDragging;
+    }
 
     this.startX = e.changedTouches[0].clientX;
     this.startY = e.changedTouches[0].clientY;
@@ -377,6 +402,9 @@ DismissController.prototype.onTouchStart = function(e) {
 };
 
 DismissController.prototype.onTouchMove = function(e) {
+    if (this.ignoreTouch)
+        return;
+
     this.velocityTracker.onTouchMove(e);
 
     if (this.state == DismissController.kInitial) {
@@ -406,6 +434,9 @@ DismissController.prototype.onTouchMove = function(e) {
 };
 
 DismissController.prototype.onTouchEnd = function(e) {
+    if (this.ignoreTouch)
+        return;
+
     this.velocityTracker.onTouchEnd(e);
 
     if (this.state == DismissController.kDragging) {
@@ -414,8 +445,8 @@ DismissController.prototype.onTouchEnd = function(e) {
             this.fling(velocityX);
             return;
         }
-        this.settleToClosestPosition();
     }
+    this.settleToClosestPosition();
 };
 
 DismissController.prototype.settleToClosestPosition = function() {
@@ -486,6 +517,7 @@ DismissController.prototype.onAnimation = function(timeStamp) {
 
     if (this.targetPosition == 0) {
         this.state = DismissController.kInitial;
+        this.canceledCallback.call(this.target);
         return false;
     }
 
@@ -536,6 +568,7 @@ ScrollAreaToolbarController.prototype.onAnimation = function(timeStamp) {
 };
 
 function AnimationController(options) {
+    this.startLater = options.startLater || false;
     this.animateCallback = options.onAnimate;
     this.animateCompleteCallback = options.onAnimateComplete;
     this.animationDuration = options.duration;
@@ -545,7 +578,8 @@ function AnimationController(options) {
     this.isComplete = false;
 
     this.animator = new Animator(this);
-    this.animator.startAnimation();
+    if (!this.startLater)
+        this.startAnimation();
 }
 
 function clamp(min, val, max) {
@@ -567,6 +601,10 @@ AnimationController.prototype.onAnimation = function(timeStamp) {
     if (this.isComplete)
         this.animateCompleteCallback();
     return !this.isComplete;
+};
+
+AnimationController.prototype.startAnimation = function() {
+    this.animator.startAnimation();
 };
 
 AnimationController.prototype.stopAnimation = function() {
