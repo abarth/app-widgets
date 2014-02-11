@@ -314,8 +314,8 @@ body {
           container: this,
           template: this.querySelector('template'),
           dataProvider: function(i) {
-            // TODO(abarth): We should get data from this.data rather than from the global fakeData.
-            return fakeData[i % fakeData.length];
+            // TODO(abarth): We should get data from this.data rather than from the global fakeListData.
+            return fakeListData[i % fakeListData.length];
           },
         });
       },

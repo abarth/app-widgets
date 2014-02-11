@@ -1,11 +1,11 @@
-"use strict";
 (function(exports) {
+'use strict';
 
 function getRandomItem(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-function generateFakeData() {
+function generateFakeListData() {
   var kNumberOfItems = 500;
   var possibleAvatarColors = [
     'BurlyWood', 'green', 'orange', 'salmon', 'lightblue', 'BlueViolet', 'DarkSeaGreen',
@@ -27,7 +27,7 @@ function generateFakeData() {
     'When, in disgrace with fortune and men\'s eyes, I all alone beweep my outcast state,',
     'We the People of the United States, in Order to form a more perfect Union, establish Justice, insure domestic Tranquility',
   ];
-  var data = new Array(kNumberOfItems);
+  var data = [];
   for (var i = 0; i < kNumberOfItems; ++i) {
     data[i] = {
       avatarColor: getRandomItem(possibleAvatarColors),
@@ -41,6 +41,25 @@ function generateFakeData() {
   return data;
 }
 
-exports.fakeData = generateFakeData();
+function repeat(s, n) {
+  return Array(n + 1).join(s);
+}
+
+function generateFakeDrawerData() {
+  var kNumberOfItems = 26;
+  var data = [];
+  var i = 0;
+  while (i < kNumberOfItems) {
+    data[i] = {
+      icon: 'dialog',
+      label: repeat(String.fromCharCode(65 + i++), 5)
+    };
+  }
+  data[i] = {icon: 'search', label: 'Search'};
+  return data;
+}
+
+exports.fakeListData = generateFakeListData();
+exports.fakeDrawerData = generateFakeDrawerData();
 
 })(window);
