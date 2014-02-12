@@ -537,7 +537,7 @@ ScrollAreaToolbarController.prototype.onAnimation = function(timeStamp) {
 
 function AnimationController(options) {
     this.animateCallback = options.onAnimate;
-    this.animateCompleteCollback = options.onAnimateComplete;
+    this.animateCompleteCallback = options.onAnimateComplete;
     this.animationDuration = options.duration;
     this.targetPosition = options.targetPosition;
     this.startPosition = options.startPosition;
@@ -548,11 +548,15 @@ function AnimationController(options) {
     this.animator.startAnimation();
 }
 
-AnimationController.prototype.restrictToBounds = function(position) {
-    if (this.targetPosition > 0)
-        return Math.min(position, this.targetPosition);
-    return Math.max(position, this.targetPosition);
+function clamp(min, val, max) {
+    if (max < min)
+        return Math.min(Math.max(max, val), min);
+    return Math.min(Math.max(min, val), max);
 }
+
+AnimationController.prototype.restrictToBounds = function(position) {
+    return clamp(this.startPosition, position, this.targetPosition);
+};
 
 AnimationController.prototype.onAnimation = function(timeStamp) {
     var deltaT = timeStamp - this.animator.startTimeStamp;
@@ -561,17 +565,17 @@ AnimationController.prototype.onAnimation = function(timeStamp) {
     this.isComplete = position == this.targetPosition;
     this.animateCallback(position);
     if (this.isComplete)
-        this.animateCompleteCollback();
+        this.animateCompleteCallback();
     return !this.isComplete;
-}
+};
 
 AnimationController.prototype.stopAnimation = function() {
     this.animator.stopAnimation();
-}
+};
 
 AnimationController.prototype.isAnimationComplete = function() {
     return this.isComplete;
-}
+};
 
 exports.DrawerController = DrawerController;
 exports.DismissController = DismissController;

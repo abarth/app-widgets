@@ -268,7 +268,7 @@ body {
     }
 
     Polymer('app-scrollarea-toolbar', {
-      'for': null,
+      for: null,
       location: 'top',
       enteredView: function() {
         if (this.location == 'top')
@@ -320,5 +320,187 @@ body {
         });
       },
     });
+  </script>
+</polymer-element>
+<polymer-element name="app-expand-menu">
+  <template>
+    <style>
+
+    #flyOut {
+      bottom: 10px;
+      display: none;
+      position: absolute;
+      right: 10px;
+      left: 0;
+    }
+
+    #expandButton {
+      background: #f2f2f2;
+      bottom: 11px;
+      height: 38px;
+      position: absolute;
+      right: 11px;
+    }
+
+    #mask {
+      -webkit-transform: translate3d(0,0,0);
+      background: linear-gradient(to top, #FFFFFF 200px, rgba(255, 255, 255, .5) 100%);
+      bottom: 0;
+      display: none;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+
+    </style>
+    <div id="mask" on-tap="{{hide}}"></div>
+    <div id="flyOut" on-tap="{{hide}}">
+      <content select="*"></content>
+    </div>
+    <polymer-ui-icon-button icon="add" id="expandButton" on-tap="{{show}}"
+        theme="polymer-ui-light-theme"></polymer-ui-icon-button>
+  </template>
+  <script>
+
+    (function() {
+      'use strict';
+
+      var DURATION = 200;
+
+      function setOpacity(element, value) {
+        // FIXME: We should animate the opacity from zero, but that triggers http://crbug.com/328106
+        element.style.opacity = Math.max(.01, value);
+      }
+
+      function setDisplayNone(element) {
+        element.style.display = 'none';
+      }
+
+      function fadeInAnimation(element, initialDisplay) {
+        element.style.display = initialDisplay;
+
+        new AnimationController({
+          onAnimate: setOpacity.bind(null, element),
+          onAnimateComplete: function() {},
+          duration: DURATION,
+          targetPosition: 1,
+          startPosition: 0,
+          curve: 'ease-in-out'
+        });
+      }
+
+      function fadeOutAnimation(element) {
+        new AnimationController({
+          onAnimate: setOpacity.bind(null, element),
+          onAnimateComplete: setDisplayNone.bind(null, element),
+          duration: DURATION,
+          targetPosition: 0,
+          startPosition: 1,
+          curve: 'ease-in-out'
+        });
+      }
+
+      Polymer('app-expand-menu', {
+        show: function() {
+          this.$.flyOut.style.display = 'block';
+          this.$.mask.style.display = 'block';
+
+          var items = this.children;
+          var translateY = 0;
+          for (var i = items.length - 1; i >= 0; i--) {
+            var item = items[i];
+
+            item.animationController = new AnimationController({
+              onAnimate: this.onItemAnimate.bind(this, item),
+              onAnimateComplete: function() {},
+              duration: DURATION,
+              targetPosition: translateY,
+              startPosition: 0,
+              curve: 'ease-in-out'
+            });
+
+            fadeInAnimation(item, 'flex');
+            translateY -= 45;
+          }
+
+          fadeOutAnimation(this.$.expandButton);
+          fadeInAnimation(this.$.mask, 'block');
+        },
+
+        hide: function() {
+          var items = this.children;
+          var translateY = 0;
+          for (var i = items.length - 1; i >= 0; i--) {
+            var item = items[i];
+            if (i !== items.length - 1) {
+              new AnimationController({
+                onAnimate: this.onItemAnimate.bind(this, item),
+                onAnimateComplete: setDisplayNone.bind(null, item),
+                duration: DURATION,
+                targetPosition: 0,
+                startPosition: translateY,
+                curve: 'ease-in-out'
+              });
+            }
+
+            fadeOutAnimation(item);
+            translateY -= 45;
+          }
+
+          fadeInAnimation(this.$.expandButton, 'block');
+          fadeOutAnimation(this.$.mask);
+        },
+
+        onItemAnimate: function(item, position) {
+          item.style.WebkitTransform = 'translate3d(0,' + position + 'px,0)';
+        }
+      });
+
+    })();
+  </script>
+</polymer-element>
+
+<polymer-element name="app-expand-menu-item" attributes="label icon">
+  <template>
+    <style>
+
+    :host {
+      -webkit-transform: translate3d(0,0,0);
+      bottom: 2px;
+      cursor: pointer;
+      font-family: sans-serif;
+      left: 0;
+      position: absolute;
+      right: 0;
+      white-space: nowrap;
+    }
+
+    polymer-ui-menu-item {
+      display: flex;
+      flex-direction: row-reverse;
+      padding: 0;
+      width: 100%;
+    }
+
+    polymer-ui-menu-item ^ #label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: end;
+      width: 100%;
+      flex: 1;
+      align-self: center;
+    }
+
+    polymer-ui-menu-item ^ polymer-ui-icon {
+      align-self: center;
+      margin-right: 9px
+    }
+
+    </style>
+    <polymer-ui-menu-item icon="{{icon}}" label="{{label}}"></polymer-ui-menu-item>
+  </template>
+  <script>
+    Polymer('app-expand-menu-item', {});
   </script>
 </polymer-element>

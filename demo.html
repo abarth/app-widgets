@@ -126,13 +126,6 @@ license that can be found in the LICENSE file.
             <polymer-ui-icon-button icon="gplus" flex></polymer-ui-icon-button>
           </polymer-ui-toolbar>
         </app-scrollarea-toolbar>
-        <app-scrollarea-toolbar for="messages" location="bottom">
-          <polymer-ui-toolbar theme="polymer-ui-dark-theme">
-            <polymer-ui-icon-button icon="add" flex></polymer-ui-icon-button>
-            <polymer-ui-icon-button icon="sort" flex></polymer-ui-icon-button>
-            <polymer-ui-icon-button icon="gplus" flex></polymer-ui-icon-button>
-          </polymer-ui-toolbar>
-        </app-scrollarea-toolbar>
         <app-drawer id="nav-drawer">
           <polymer-ui-menu selected="0" theme="polymer-ui-light-theme" active="false">
             <template repeat>
@@ -141,6 +134,15 @@ license that can be found in the LICENSE file.
           </polymer-ui-menu>
         </app-drawer>
       </app-column>
+
+      <app-expand-menu>
+        <app-expand-menu-item icon="dialog" label="Adam"></app-expand-menu-item>
+        <app-expand-menu-item icon="dialog" label="Ojan"></app-expand-menu-item>
+        <app-expand-menu-item icon="dialog" label="Elliott"></app-expand-menu-item>
+        <app-expand-menu-item icon="dialog" label="Chris"></app-expand-menu-item>
+        <app-expand-menu-item icon="settings" label="Settings"></app-expand-menu-item>
+      </app-expand-menu>
+
     </app-frame>
     <script>
       document.addEventListener('WebComponentsReady', function() {
