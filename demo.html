@@ -146,7 +146,9 @@ license that can be found in the LICENSE file.
       document.addEventListener('WebComponentsReady', function() {
         document.getElementById('menu-button').addEventListener('click', function() {
           var navDrawer = document.getElementById('nav-drawer');
-          navDrawer.querySelector('template').model = fakeDrawerData;
+          var templateElement = navDrawer.querySelector('template');
+          if (!templateElement.model)
+            templateElement.model = fakeDrawerData;
           navDrawer.toggle();
         });
       });
