@@ -129,64 +129,147 @@ body {
     <content></content>
   </template>
   <script>
-    function transformItemUp(yPosition) {
-      var currentXTranslate = this.style.WebkitTransform ? this.style.WebkitTransform.split('(')[1].split(',')[0] : 0;
-      this.style.WebkitTransform = 'translate3d(' + currentXTranslate + ',' + yPosition + 'px,0)';
+    function getTransformValue(item) {
+      return item.transformValue_ || 0;
     }
 
     Polymer('app-dismissable-list', {
-      itemsToRemove: [],
-      removeItems: function() {
-        // To simplify the math in dismissItem, wait until all the dismiss animations are done before
-        // removing the dismissed items from the DOM.
-        for (var i = 0, len = this.childNodes.length; i < len; ++i) {
-          var item = this.childNodes[i];
-          if (item.animationController && !item.animationController.isAnimationComplete())
-            return;
+      dismissInProgressCount: 0,
+      ready: function() {
+        this.itemsToRemove = [];
+        this.itemsToAnimate = [];
+      },
+      queueDismissal: function() {
+        this.dismissInProgressCount++;
+      },
+      unqueueDismissal: function() {
+        this.dismissInProgressCount--;
+        if (this.dismissInProgressCount > 0)
+          return;
+        this.startAnimation();
+      },
+      startAnimation: function() {
+        if (!this.itemsToAnimate.length) {
+          this.onAnimationComplete();
+          return;
         }
 
-        this.itemsToRemove.forEach(function(item) {
-          item.remove();
-        });
-        this.itemsToRemove = [];
-
-        for (var i = 0, len=this.childNodes.length; i < len; ++i) {
-          var item = this.childNodes[i];
-          // Skip text nodes.
-          if (!item.style)
-            continue;
+        // Iterate over all to deactivate further dismissal until
+        // all animations are complete.
+        for (var i = 1, len = this.children.length; i < len; ++i) {
+          var item = this.children[i];
+          item.controller.setActive(false);
           if (item.animationController)
-            item.animationController.stopAnimation();
+            item.animationController.startAnimation();
+        }
+      },
+      onItemAnimate: function(item, position) {
+        item.style.WebkitTransform = 'translate3d(0,' + position + 'px,0)';
+      },
+      onAnimationComplete: function(item) {
+        var index = this.itemsToAnimate.indexOf(item);
+        if (index > -1)
+          this.itemsToAnimate.splice(index, 1);
+
+        // We have pending animations, defer completion.
+        if (this.itemsToAnimate.length)
+          return;
+
+        if (this.itemsToRemove.length) {
+          this.fire('dismiss-items', { items: this.itemsToRemove });
+          this.itemsToRemove = [];
+        }
+
+        for (var i = 1, len = this.children.length; i < len; ++i) {
+          var item = this.children[i];
+          item.controller.setActive(true);
           item.animationController = null;
-          item.style.WebkitTransform = 'translate3d(0,0,0)';
+          item.style.opacity = '';
         }
       },
       dismissItem: function(item) {
-        var index = Array.prototype.indexOf.call(this.childNodes, item);
-        this.itemsToRemove.push(item);
-        var height = this.childNodes[index].offsetHeight;
+        var itemIndex = Array.prototype.indexOf.call(this.children, item);
+        var itemYTranslate = getTransformValue(item);
 
-        for (var i = index + 1, len=this.childNodes.length; i < len; ++i) {
-          var item = this.childNodes[i];
-          // Skip text nodes.
-          if (!item.style)
+        this.itemsToRemove.push(item);
+        var height = this.children[itemIndex].offsetHeight;
+
+        function isVisuallyAfterDismissedItem(subject, index, yTranslate) {
+          if (yTranslate > itemYTranslate)
+            return true;
+          if (yTranslate == itemYTranslate && itemIndex < index)
+            return true;
+          return false;
+        }
+
+        for (var i = 0, len = this.children.length; i < len; ++i) {
+          var item = this.children[i];
+          var currentYTranslate = getTransformValue(item);
+
+          if (!isVisuallyAfterDismissedItem(item, i, currentYTranslate))
             continue;
 
-          var currentYTranslate = item.style.WebkitTransform ? parseInt(item.style.WebkitTransform.split(',')[1], 0) : 0;
-          var previousTarget = item.animationController ? item.animationController.targetPosition : 0;
+          var previousTarget = item.animationController ?
+              item.animationController.targetPosition : currentYTranslate;
 
-          if (item.animationController)
-            item.animationController.stopAnimation();
+          if (!item.animationController)
+            this.itemsToAnimate.push(item);
 
           item.animationController = new AnimationController({
-            onAnimate: transformItemUp.bind(item),
-            onAnimateComplete: this.removeItems.bind(this),
+            startLater: true,
+            onAnimate: this.onItemAnimate.bind(this, item),
+            onAnimateComplete: this.onAnimationComplete.bind(this, item),
             duration: 200,
             targetPosition: previousTarget - height,
             startPosition: currentYTranslate,
             curve: 'ease-in-out',
           });
         }
+      },
+      dismissItemAnimateHeight: function(item) {
+        // FIXME: Animation doesn't work with items transformed out of
+        // their DOM order.
+
+        this.itemsToRemove.push(item);
+
+        // Remove padding and set the height so that the height animation
+        // goes from the current height to 0 instead of current height to
+        // the padding height.
+        item.style.height = item.clientHeight + 'px';
+        item.style.padding = 0;
+
+        // Empty the contents of the item to make layouts fast.
+        item.children_ = item.children;
+        item.textContent = '';
+
+        // Force a layout to get the above styling to take before the start
+        // of the animation.
+        item.offsetTop;
+
+        item.style.height = 0;
+        item.style.transition = "height 0.2s ease-in-out";
+
+        var onTransitionEnd = function() {
+          item.removeEventListener('webkitTransitionEnd', onTransitionEnd);
+
+          for (var i = 0, len = item.children_.length; i < len; ++i)
+            item.appendChild(item.children_[i]);
+          item.children_ = null;
+
+          item.style.transition = '';
+          item.style.padding = '';
+          item.style.border = '';
+          item.style.opacity = '';
+          item.style.height = '';
+
+          var currentY = getTransformValue(item);
+          item.style.WebkitTransform = 'translate3d(0,' + currentY + 'px,0)';
+
+          this.fire('dismiss-items', { items: this.itemsToRemove });
+          this.itemsToRemove = [];
+        }.bind(this);
+
+        item.addEventListener('webkitTransitionEnd', onTransitionEnd);
       },
     });
   </script>
@@ -204,42 +287,33 @@ body {
   </template>
   <script>
     Polymer('app-dismissable-item', {
+      animateHeight: false,
       enteredView: function() {
+        this.animateHeight = window.location.search.indexOf('animateHeightOnDismiss') != -1;
         this.style.WebkitTransform = 'translate3d(0,0,0)';
         this.controller = new DismissController({
             target: this,
             curve: 'ease-in-out',
+            onStart: function() {
+              if (!this.animateHeight)
+                this.parentNode.queueDismissal();
+            },
             onMove: function(position) {
               var width = this.offsetWidth;
               this.style.opacity = (width - Math.abs(position)) / width;
-              var currentY = this.style.WebkitTransform.split(',')[1];
-              this.style.WebkitTransform = 'translate3d(' + position + 'px,' + currentY + ',0)';
+              var currentY = getTransformValue(this);
+              this.style.WebkitTransform = 'translate3d(' + position + 'px,' + currentY + 'px,0)';
+            },
+            onCanceled: function() {
+              if (!this.animateHeight)
+                this.parentNode.unqueueDismissal();
             },
             onDismiss: function(direction) {
-              if (window.location.search.indexOf('animateHeightOnDismiss') == -1) {
+              if (!this.animateHeight) {
                 this.parentNode.dismissItem(this);
-                return;
-              }
-
-              // Remove padding and set the height so that the height animation
-              // goes from the current height to 0 instead of current height to
-              // the padding height.
-              this.style.height = this.clientHeight + 'px';
-              this.style.padding = 0;
-
-              // Empty the contents of the item to make layouts fast.
-              this.textContent = '';
-
-              // Force a layout to get the above styling to take before the start
-              // of the animation.
-              this.offsetTop;
-
-              this.style.height = 0;
-              this.style.transition = "height 0.2s ease-in-out";
-
-              this.addEventListener('webkitTransitionEnd', function() {
-                this.remove();
-              });
+                this.parentNode.unqueueDismissal();
+              } else
+                this.parentNode.dismissItemAnimateHeight(this);
             },
         });
       },
@@ -283,7 +357,7 @@ body {
           scrollArea: scrollArea,
           onMove: function(position) {
             var translateY = this.location == 'top' ? -position : position;
-            this.style.WebkitTransform = 'translate3d(0,' + translateY +'px,0)';
+            this.style.WebkitTransform = 'translate3d(0,' + translateY + 'px,0)';
           },
         });
       },
@@ -308,15 +382,12 @@ body {
       count: 500,
       enteredView: function() {
         this.$.runway.style.height = this.height * this.count + 'px';
+        this.data = new FakeDataProvider(this.count);
         this.engine = new ScrollingEngine({
           height: this.height,
-          count: this.count,
           container: this,
           template: this.querySelector('template'),
-          dataProvider: function(i) {
-            // TODO(abarth): We should get data from this.data rather than from the global fakeListData.
-            return fakeListData[i % fakeListData.length];
-          },
+          dataProvider: this.data,
         });
       },
     });

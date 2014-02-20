@@ -102,7 +102,7 @@ license that can be found in the LICENSE file.
         <app-list id="messages">
           <app-dismissable-list class="padding-wrapper">
             <template repeat>
-              <app-dismissable-item class="item conversation">
+              <app-dismissable-item class="item conversation" id="{{ id }}">
                 <div class="avatar" style="background-color: {{ avatarColor }}">{{ avatarLetter }}</div>
                 <div class="summary">
                   <div class="topline">
@@ -152,6 +152,10 @@ license that can be found in the LICENSE file.
           if (!templateElement.model)
             templateElement.model = fakeDrawerData;
           navDrawer.toggle();
+        });
+        document.querySelector('app-dismissable-list').addEventListener('dismiss-items', function(e) {
+          var dataProvider = e.target.parentElement.data;
+          dataProvider.deleteItemByIds(e.detail.items.map(function(item) { return item.id; }));
         });
       });
     </script>

@@ -6,7 +6,6 @@ var kPhysicalRunway = 10;
 
 function ScrollingEngine(options) {
   this.height_ = options.height;
-  this.count_ = options.count;
 
   this.dataProvider_ = options.dataProvider;
   this.template_ = options.template;
@@ -20,7 +19,7 @@ function ScrollingEngine(options) {
   this.physicalData_ = new Array(this.physicalCount_);
   for (var i = 0; i < this.physicalCount_; ++i)
     this.physicalData_[i] = {};
-  var exampleDatum = this.dataProvider_(0);
+  var exampleDatum = this.dataProvider_.getItem(0);
   this.propertyNames_ = Object.getOwnPropertyNames(exampleDatum);
 
   this.template_.model = this.physicalData_;
@@ -42,10 +41,13 @@ function ScrollingEngine(options) {
   this.container_.addEventListener('scroll', function(e) {
     self.onScroll_(e);
   });
+  this.dataProvider_.addEventListener('data-changed', function(e) {
+    self.refresh_(true);
+  });
 }
 
 ScrollingEngine.prototype.updateItem_ = function(virtualIndex, physicalIndex) {
-  var virtualDatum = this.dataProvider_(virtualIndex);
+  var virtualDatum = this.dataProvider_.getItem(virtualIndex);
   var physicalDatum = this.physicalData_[physicalIndex];
 
   for (var i = 0; i < this.propertyNames_.length; ++i) {
@@ -55,13 +57,17 @@ ScrollingEngine.prototype.updateItem_ = function(virtualIndex, physicalIndex) {
 };
 
 ScrollingEngine.prototype.onScroll_ = function(e) {
+  this.refresh_(false);
+}
+
+ScrollingEngine.prototype.refresh_ = function(force) {
   var scrollTop = this.container_.scrollTop;
 
   var firstVisibleIndex = Math.floor(scrollTop / this.height_);
   var visibleMidpoint = firstVisibleIndex + this.visibleCount_ / 2;
 
   var firstReifiedIndex = Math.max(0, Math.floor(visibleMidpoint - this.physicalCount_ / 2));
-  firstReifiedIndex = Math.min(firstReifiedIndex, this.count_ - this.physicalCount_);
+  firstReifiedIndex = Math.min(firstReifiedIndex, this.dataProvider_.getItemCount() - this.physicalCount_);
 
   var firstPhysicalIndex = firstReifiedIndex % this.physicalCount_;
   var baseVirtualIndex = firstReifiedIndex - firstPhysicalIndex;
@@ -76,7 +82,7 @@ ScrollingEngine.prototype.onScroll_ = function(e) {
   window.requestAnimationFrame(function() {
     for (var i = 0; i < firstPhysicalIndex; ++i) {
       var item = self.physicalItems_[i];
-      if (item.transformValue_ != nextTransformValue) {
+      if (force || item.transformValue_ != nextTransformValue) {
         self.updateItem_(baseVirtualIndex + self.physicalCount_ + i, i);
         item.style.WebkitTransform = nextTransformString;
       }
@@ -84,7 +90,7 @@ ScrollingEngine.prototype.onScroll_ = function(e) {
     }
     for (var i = firstPhysicalIndex; i < self.physicalCount_; ++i) {
       var item = self.physicalItems_[i];
-      if (item.transformValue_ != baseTransformValue) {
+      if (force || item.transformValue_ != baseTransformValue) {
         self.updateItem_(baseVirtualIndex + i, i);
         item.style.WebkitTransform = baseTransformString;
       }
