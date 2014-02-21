@@ -74,9 +74,13 @@ license that can be found in the LICENSE file.
       .preview {
         flex: 1;
         flex-shrink: 0;
+        display: -webkit-box;
         font-size: 12px;
-        height: 2em;
+        height: 2.5em;
         text-overflow: ellipsis;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
       }
       .subject {
         font-weight: bold;
