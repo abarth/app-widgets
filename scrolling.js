@@ -72,8 +72,8 @@ ScrollingEngine.prototype.refresh_ = function(force) {
   var firstPhysicalIndex = firstReifiedIndex % this.physicalCount_;
   var baseVirtualIndex = firstReifiedIndex - firstPhysicalIndex;
 
-  var baseTransformValue = this.height_ * baseVirtualIndex;
-  var nextTransformValue = baseTransformValue + this.physicalHeight_;
+  var baseTransformValue = Math.floor(this.height_ * baseVirtualIndex);
+  var nextTransformValue = Math.floor(baseTransformValue + this.physicalHeight_);
 
   var baseTransformString = 'translate3d(0,' + baseTransformValue + 'px,0)';
   var nextTransformString = 'translate3d(0,' + nextTransformValue + 'px,0)';
