@@ -24,26 +24,24 @@ function ScrollingEngine(options) {
 
   this.template_.model = this.physicalData_;
 
-  // TODO(abarth): What should we do here with Object.observe?
-  if (window.Platform)
-    Platform.performMicrotaskCheckpoint();
+  Platform.endOfMicrotask(function() {
+    this.physicalItems_ = new Array(this.physicalCount_);
+    for (var i = 0, item = this.template_.nextElementSibling;
+         item && i < this.physicalCount_;
+         ++i, item = item.nextElementSibling) {
+      this.physicalItems_[i] = item;
+      item.transformValue_ = 0;
+      this.updateItem_(i, i);
+    }
 
-  this.physicalItems_ = new Array(this.physicalCount_);
-  for (var i = 0, item = this.template_.nextElementSibling;
-       item && i < this.physicalCount_;
-       ++i, item = item.nextElementSibling) {
-    this.physicalItems_[i] = item;
-    item.transformValue_ = 0;
-    this.updateItem_(i, i);
-  }
-
-  var self = this;
-  this.container_.addEventListener('scroll', function(e) {
-    self.onScroll_(e);
-  });
-  this.dataProvider_.addEventListener('data-changed', function(e) {
-    self.refresh_(true);
-  });
+    var self = this;
+    this.container_.addEventListener('scroll', function(e) {
+      self.onScroll_(e);
+    });
+    this.dataProvider_.addEventListener('data-changed', function(e) {
+      self.refresh_(true);
+    });
+  }.bind(this));
 }
 
 ScrollingEngine.prototype.updateItem_ = function(virtualIndex, physicalIndex) {
@@ -98,7 +96,7 @@ ScrollingEngine.prototype.refresh_ = function(force) {
     }
 
     if (window.Platform)
-      Platform.performMicrotaskCheckpoint();
+      Platform.flush();
   });
 };
 
