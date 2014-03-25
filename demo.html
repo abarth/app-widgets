@@ -148,19 +148,24 @@ license that can be found in the LICENSE file.
 
     </app-frame>
     <script>
+      var toggleFn = function() {
+        var navDrawer = document.getElementById('nav-drawer');
+        var templateElement = navDrawer.querySelector('template');
+        if (!templateElement.model)
+          templateElement.model = fakeDrawerData;
+        navDrawer.toggle();
+      }
       document.addEventListener('polymer-ready', function() {
-        document.getElementById('menu-button').addEventListener('click', function() {
-          var navDrawer = document.getElementById('nav-drawer');
-          var templateElement = navDrawer.querySelector('template');
-          if (!templateElement.model)
-            templateElement.model = fakeDrawerData;
-          navDrawer.toggle();
-        });
+        document.getElementById('menu-button').addEventListener('click', toggleFn);
         document.querySelector('app-dismissable-list').addEventListener('dismiss-items', function(e) {
           var dataProvider = e.target.parentElement.data;
           dataProvider.deleteItemByIds(e.detail.items.map(function(item) { return item.id; }));
         });
       });
+
+      if (window.location.href.indexOf("toggleDrawer=1") != -1) {
+        setInterval(toggleFn, 400);
+      }
     </script>
   </body>
 </html>
