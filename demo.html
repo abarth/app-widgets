@@ -14,7 +14,9 @@ license that can be found in the LICENSE file.
     <link rel="import" href="bower_components/polymer-ui-menu/polymer-ui-menu.html">
     <link rel="import" href="bower_components/polymer-ui-menu-item/polymer-ui-menu-item.html">
     <link rel="import" href="bower_components/polymer-ui-toolbar/polymer-ui-toolbar.html">
-    <link rel="import" href="bower_components/polymer-ui-icon-button/polymer-ui-icon-button.html">
+    <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
+    <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
+    <link rel="import" href="bower_components/polymer-core-icons/core-icons.html">
     <script src="data.js"></script>
     <style>
       body {
@@ -92,15 +94,19 @@ license that can be found in the LICENSE file.
         flex-shrink: 0;
         font-size: 20px;
       }
+
+      .polymer-ui-dark-theme core-icon-button {
+        fill: #C2C2C2;
+      }
     </style>
   </head>
   <body class="polymer-ui-body-text" unresolved>
     <app-frame>
       <polymer-ui-toolbar theme="polymer-ui-light-theme">
-        <polymer-ui-icon-button icon="menu" id="menu-button"></polymer-ui-icon-button>
+        <core-icon-button icon="menu" id="menu-button"></core-icon-button>
         <div flex>Demo app</div>
-        <polymer-ui-icon-button icon="refresh"></polymer-ui-icon-button>
-        <polymer-ui-icon-button icon="add"></polymer-ui-icon-button>
+        <core-icon-button icon="refresh"></core-icon-button>
+        <core-icon-button icon="add"></core-icon-button>
       </polymer-ui-toolbar>
       <app-column>
         <app-list id="messages">
@@ -125,9 +131,9 @@ license that can be found in the LICENSE file.
         </app-list>
         <app-scrollarea-toolbar for="messages">
           <polymer-ui-toolbar theme="polymer-ui-dark-theme">
-            <polymer-ui-icon-button icon="add" flex></polymer-ui-icon-button>
-            <polymer-ui-icon-button icon="sort" flex></polymer-ui-icon-button>
-            <polymer-ui-icon-button icon="gplus" flex></polymer-ui-icon-button>
+            <core-icon-button icon="add" flex></core-icon-button>
+            <core-icon-button icon="sort" flex></core-icon-button>
+            <core-icon-button icon="google-plus" flex></core-icon-button>
           </polymer-ui-toolbar>
         </app-scrollarea-toolbar>
         <app-drawer id="nav-drawer">
