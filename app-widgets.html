@@ -64,8 +64,9 @@ body {
         width: 300px;
         bottom: 0;
         background-color: white;
-        -webkit-transform: translate3d(0,0,0);
         overflow-y: scroll;
+        will-change: transform;
+        transform: translateX(-300px);
       }
       #mask {
         display: none;
@@ -74,8 +75,10 @@ body {
         left: 0;
         right: 0;
         bottom: 0;
+        opacity: 0;
+        will-change: opacity;
         background-color: black;
-        -webkit-transform: translate3d(0,0,0);
+        transform: translateZ(0);
       }
     </style>
     <div id="mask" on-tap="{{ toggle }}"></div>
@@ -110,8 +113,8 @@ body {
             },
             onAnimate: function(position) {
                 // FIXME: We should animate the opacity from zero, but that triggers http://crbug.com/328106
-                mask.style.opacity = ((position + 1) / 300) * 0.2;
-                content.style.WebkitTransform = 'translate3d(' + (position - 300) + 'px,0,0)';
+                mask.style.opacity = (position / 300) * 0.2;
+                content.style.transform = 'translateX(' + (position - 300) + 'px)';
             },
         });
       },

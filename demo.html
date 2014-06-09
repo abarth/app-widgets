@@ -22,7 +22,13 @@ license that can be found in the LICENSE file.
       body {
         -webkit-user-select: none;
       }
-      #messages {
+    </style>
+  </head>
+  <body class="polymer-ui-body-text" unresolved>
+    <polymer-element name="app-demo">
+      <template>
+        <style>
+              #messages {
         background-color: darkgrey;
       }
       .padding-wrapper {
@@ -98,81 +104,76 @@ license that can be found in the LICENSE file.
       .polymer-ui-dark-theme core-icon-button {
         fill: #C2C2C2;
       }
-    </style>
-  </head>
-  <body class="polymer-ui-body-text" unresolved>
-    <app-frame>
-      <polymer-ui-toolbar theme="polymer-ui-light-theme">
-        <core-icon-button icon="menu" id="menu-button"></core-icon-button>
-        <div flex>Demo app</div>
-        <core-icon-button icon="refresh"></core-icon-button>
-        <core-icon-button icon="add"></core-icon-button>
-      </polymer-ui-toolbar>
-      <app-column>
-        <app-list id="messages">
-          <app-dismissable-list class="padding-wrapper">
-            <template repeat>
-              <app-dismissable-item class="item conversation" id="{{ id }}">
-                <div class="avatar" style="background-color: {{ avatarColor }}">{{ avatarLetter }}</div>
-                <div class="summary">
-                  <div class="topline">
-                    <div class="participants">{{ participants }}</div>
-                    <div class="time">{{ time }}</div>
-                  </div>
-                  <div class="bottomline">
-                    <div class="preview"><span class="subject">{{ subject }}</span> &mdash;
-                      <span class="snippet">{{ snippet }}</span></div>
-                    <div class="trinkets">&#x2606;</div>
-                  </div>
-                </div>
-              </app-dismissable-item>
-            </template>
-          </app-dismissable-list>
-        </app-list>
-        <app-scrollarea-toolbar for="messages">
-          <polymer-ui-toolbar theme="polymer-ui-dark-theme">
-            <core-icon-button icon="add" flex></core-icon-button>
-            <core-icon-button icon="sort" flex></core-icon-button>
-            <core-icon-button icon="google-plus" flex></core-icon-button>
+      </style>
+        <app-frame>
+          <polymer-ui-toolbar theme="polymer-ui-light-theme">
+            <core-icon-button icon="menu" on-tap="{{ toggleMenu }}"></core-icon-button>
+            <div flex>Demo app</div>
+            <core-icon-button icon="refresh"></core-icon-button>
+            <core-icon-button icon="add"></core-icon-button>
           </polymer-ui-toolbar>
-        </app-scrollarea-toolbar>
-        <app-drawer id="nav-drawer">
-          <polymer-ui-menu selected="0" theme="polymer-ui-light-theme" active="false">
-            <template repeat>
-              <polymer-ui-menu-item icon="{{icon}}" label="{{label}}"></polymer-ui-menu-item>
-            </template>
-          </polymer-ui-menu>
-        </app-drawer>
-      </app-column>
+          <app-column>
+            <app-list id="messages">
+              <app-dismissable-list class="padding-wrapper" on-dismiss-items="{{ dismissItem }}">
+                <template repeat>
+                  <app-dismissable-item class="item conversation" id="{{ id }}">
+                    <div class="avatar" style="background-color: {{ avatarColor }}">{{ avatarLetter }}</div>
+                    <div class="summary">
+                      <div class="topline">
+                        <div class="participants">{{ participants }}</div>
+                        <div class="time">{{ time }}</div>
+                      </div>
+                      <div class="bottomline">
+                        <div class="preview"><span class="subject">{{ subject }}</span> &mdash;
+                          <span class="snippet">{{ snippet }}</span></div>
+                        <div class="trinkets">&#x2606;</div>
+                      </div>
+                    </div>
+                  </app-dismissable-item>
+                </template>
+              </app-dismissable-list>
+            </app-list>
+            <app-scrollarea-toolbar for="messages">
+              <polymer-ui-toolbar theme="polymer-ui-dark-theme">
+                <core-icon-button icon="add" flex></core-icon-button>
+                <core-icon-button icon="sort" flex></core-icon-button>
+                <core-icon-button icon="google-plus" flex></core-icon-button>
+              </polymer-ui-toolbar>
+            </app-scrollarea-toolbar>
+            <app-drawer id="nav-drawer">
+              <polymer-ui-menu selected="0" theme="polymer-ui-light-theme" active="false">
+                <template repeat="{{ item in menuItems }}">
+                  <polymer-ui-menu-item icon="{{ item.icon }}" label="{{ item.label }}"></polymer-ui-menu-item>
+                </template>
+              </polymer-ui-menu>
+            </app-drawer>
+          </app-column>
 
-      <app-expand-menu>
-        <app-expand-menu-item icon="dialog" label="Adam"></app-expand-menu-item>
-        <app-expand-menu-item icon="dialog" label="Ojan"></app-expand-menu-item>
-        <app-expand-menu-item icon="dialog" label="Elliott"></app-expand-menu-item>
-        <app-expand-menu-item icon="dialog" label="Chris"></app-expand-menu-item>
-        <app-expand-menu-item icon="settings" label="Settings"></app-expand-menu-item>
-      </app-expand-menu>
+          <app-expand-menu>
+            <app-expand-menu-item icon="dialog" label="Adam"></app-expand-menu-item>
+            <app-expand-menu-item icon="dialog" label="Ojan"></app-expand-menu-item>
+            <app-expand-menu-item icon="dialog" label="Elliott"></app-expand-menu-item>
+            <app-expand-menu-item icon="dialog" label="Chris"></app-expand-menu-item>
+            <app-expand-menu-item icon="settings" label="Settings"></app-expand-menu-item>
+          </app-expand-menu>
 
-    </app-frame>
-    <script>
-      var toggleFn = function() {
-        var navDrawer = document.getElementById('nav-drawer');
-        var templateElement = navDrawer.querySelector('template');
-        if (!templateElement.model)
-          templateElement.model = fakeDrawerData;
-        navDrawer.toggle();
-      }
-      document.addEventListener('polymer-ready', function() {
-        document.getElementById('menu-button').addEventListener('click', toggleFn);
-        document.querySelector('app-dismissable-list').addEventListener('dismiss-items', function(e) {
-          var dataProvider = e.target.parentElement.data;
-          dataProvider.deleteItemByIds(e.detail.items.map(function(item) { return item.id; }));
+        </app-frame>
+      </template>
+      <script>
+        Polymer('app-demo', {
+          menuItems: fakeDrawerData,
+          toggleMenu: function() {
+            // Ideally, we'd delay inflating the model for the drawer until now.
+            // this.menuItems = fakeDrawerData;
+            this.$['nav-drawer'].toggle();
+          },
+          dismissItem: function(event) {
+            var dataProvider = event.target.parentElement.data;
+            dataProvider.deleteItemByIds(e.detail.items.map(function(item) { return item.id; }));
+          },
         });
-      });
-
-      if (window.location.href.indexOf("toggleDrawer=1") != -1) {
-        setInterval(toggleFn, 400);
-      }
-    </script>
+      </script>
+    </polymer-element>
+    <app-demo></app-demo>
   </body>
 </html>
