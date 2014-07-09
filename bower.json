@@ -17,10 +17,7 @@
   "dependencies": {
     "platform": "Polymer/platform",
     "polymer": "Polymer/polymer",
-    "polymer-elements": "Polymer/polymer-elements",
-    "polymer-ui-elements": "Polymer/polymer-ui-elements",
-    "core-icons": "Polymer/core-icons",
-    "core-icon-button": "Polymer/core-icon-button",
-    "paper-slider": "Polymer/paper-slider"
+    "core-elements": "Polymer/core-elements",
+    "paper-elements": "Polymer/paper-elements"
   }
 }

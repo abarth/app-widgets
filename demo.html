@@ -17,6 +17,9 @@ license that can be found in the LICENSE file.
     <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
     <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
     <link rel="import" href="bower_components/core-icons/core-icons.html">
+    <link rel="import" href="bower_components/paper-item/paper-item.html">
+    <link rel="import" href="bower_components/core-menu/core-menu.html">
+    <link rel="import" href="bower_components/core-icons/communication-icons.html">
     <script src="data.js"></script>
     <style>
       body {
@@ -141,11 +144,11 @@ license that can be found in the LICENSE file.
               </polymer-ui-toolbar>
             </app-scrollarea-toolbar>
             <app-drawer id="nav-drawer">
-              <polymer-ui-menu selected="0" theme="polymer-ui-light-theme" active="false">
+              <core-menu selected="0" active="false">
                 <template repeat="{{ item in menuItems }}">
-                  <polymer-ui-menu-item icon="{{ item.icon }}" label="{{ item.label }}"></polymer-ui-menu-item>
+                  <paper-item icon="{{ item.icon }}" label="{{ item.label }}"></paper-item>
                 </template>
-              </polymer-ui-menu>
+              </core-menu>
             </app-drawer>
           </app-column>
 
