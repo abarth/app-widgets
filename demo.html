@@ -15,11 +15,13 @@ license that can be found in the LICENSE file.
     <link rel="import" href="bower_components/polymer-ui-menu/polymer-ui-menu.html">
     <link rel="import" href="bower_components/polymer-ui-menu-item/polymer-ui-menu-item.html">
     <link rel="import" href="bower_components/polymer-ui-toolbar/polymer-ui-toolbar.html">
+    <link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
     <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
     <link rel="import" href="bower_components/core-icons/core-icons.html">
     <link rel="import" href="bower_components/paper-item/paper-item.html">
     <link rel="import" href="bower_components/paper-button/paper-button.html">
     <link rel="import" href="bower_components/core-menu/core-menu.html">
+    <link rel="import" href="bower_components/paper-menu-button/paper-menu-button.html">
     <link rel="import" href="bower_components/core-icons/iconsets/communication-icons.html">
     <script src="data.js"></script>
     <style>
@@ -112,12 +114,17 @@ license that can be found in the LICENSE file.
       }
       </style>
         <app-frame>
-          <polymer-ui-toolbar theme="polymer-ui-light-theme">
+          <core-toolbar>
             <paper-button icon="menu" on-tap="{{ toggleMenu }}"></paper-button>
             <div flex>Demo app</div>
             <paper-button icon="refresh"></paper-button>
-            <paper-button icon="add"></paper-button>
-          </polymer-ui-toolbar>
+            <paper-menu-button icon="add" valign="bottom" halign="right">
+              <paper-item icon="dialog" label="Ojan"></paper-item>
+              <paper-item icon="dialog" label="Elliott"></paper-item>
+              <paper-item icon="dialog" label="Chris"></paper-item>
+              <paper-item icon="settings" label="Settings"></paper-item>
+            </paper-menu-button>
+          </core-toolbar>
           <app-column>
             <app-list id="messages">
               <app-dismissable-list class="padding-wrapper" on-dismiss-items="{{ dismissItem }}">
@@ -140,11 +147,11 @@ license that can be found in the LICENSE file.
               </app-dismissable-list>
             </app-list>
             <app-scrollarea-toolbar for="messages">
-              <polymer-ui-toolbar>
+              <core-toolbar>
                 <paper-button icon="add" flex></paper-button>
                 <paper-button icon="sort" flex></paper-button>
                 <paper-button icon="google-plus" flex></paper-button>
-              </polymer-ui-toolbar>
+              </core-toolbar>
             </app-scrollarea-toolbar>
             <app-drawer id="nav-drawer">
               <core-menu selected="0" active="false">
@@ -155,13 +162,6 @@ license that can be found in the LICENSE file.
             </app-drawer>
           </app-column>
 
-          <app-expand-menu>
-            <app-expand-menu-item icon="dialog" label="Adam"></app-expand-menu-item>
-            <app-expand-menu-item icon="dialog" label="Ojan"></app-expand-menu-item>
-            <app-expand-menu-item icon="dialog" label="Elliott"></app-expand-menu-item>
-            <app-expand-menu-item icon="dialog" label="Chris"></app-expand-menu-item>
-            <app-expand-menu-item icon="settings" label="Settings"></app-expand-menu-item>
-          </app-expand-menu>
 
         </app-frame>
       </template>

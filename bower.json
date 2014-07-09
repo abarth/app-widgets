@@ -15,9 +15,8 @@
     "tests"
   ],
   "dependencies": {
-    "platform": "Polymer/platform",
-    "polymer": "Polymer/polymer",
-    "core-elements": "Polymer/core-elements",
-    "paper-elements": "Polymer/paper-elements"
+    "polymer": "Polymer/polymer#master",
+    "core-elements": "Polymer/core-elements#master",
+    "paper-elements": "Polymer/paper-elements#master"
   }
 }
