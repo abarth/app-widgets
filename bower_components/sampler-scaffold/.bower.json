@@ -1,0 +1,22 @@
+{
+  "name": "sampler-scaffold",
+  "private": true,
+  "dependencies": {
+    "core-drawer-panel": "Polymer/core-drawer-panel#master",
+    "core-header-panel": "Polymer/core-header-panel#master",
+    "core-icon-button": "Polymer/core-icon-button#master",
+    "core-item": "Polymer/core-item#master",
+    "core-menu": "Polymer/core-menu#master",
+    "core-toolbar": "Polymer/core-toolbar#master"
+  },
+  "homepage": "https://github.com/Polymer/sampler-scaffold",
+  "_release": "b71cbb3936",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "b71cbb3936f08a49468fecd7968bde0e607b1a7a"
+  },
+  "_source": "git://github.com/Polymer/sampler-scaffold.git",
+  "_target": "master",
+  "_originalSource": "Polymer/sampler-scaffold"
+}
