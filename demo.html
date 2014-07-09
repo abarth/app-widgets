@@ -172,7 +172,7 @@ license that can be found in the LICENSE file.
           },
           dismissItem: function(event) {
             var dataProvider = event.target.parentElement.data;
-            dataProvider.deleteItemByIds(e.detail.items.map(function(item) { return item.id; }));
+            dataProvider.deleteItemByIds(event.detail.items.map(function(item) { return item.id; }));
           },
         });
       </script>
