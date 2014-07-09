@@ -11,6 +11,7 @@ license that can be found in the LICENSE file.
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="import" href="app-widgets.html">
+    <link rel="import" href="bower_components/font-roboto/roboto.html">
     <link rel="import" href="bower_components/polymer-ui-menu/polymer-ui-menu.html">
     <link rel="import" href="bower_components/polymer-ui-menu-item/polymer-ui-menu-item.html">
     <link rel="import" href="bower_components/polymer-ui-toolbar/polymer-ui-toolbar.html">
@@ -24,6 +25,9 @@ license that can be found in the LICENSE file.
     <style>
       body {
         -webkit-user-select: none;
+        font-family: "RobotoDraft",Helvetica,Arial,sans-serif;
+        font-weight: 300;
+        line-height: 24px;
       }
     </style>
   </head>
@@ -44,7 +48,6 @@ license that can be found in the LICENSE file.
         background-color: white;
       }
       .conversation {
-        font-family: sans-serif;
         height: 70px;
         display: flex;
         border-bottom: 1px solid lightgray;
