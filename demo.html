@@ -16,9 +16,9 @@ license that can be found in the LICENSE file.
     <link rel="import" href="bower_components/polymer-ui-menu-item/polymer-ui-menu-item.html">
     <link rel="import" href="bower_components/polymer-ui-toolbar/polymer-ui-toolbar.html">
     <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
-    <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
     <link rel="import" href="bower_components/core-icons/core-icons.html">
     <link rel="import" href="bower_components/paper-item/paper-item.html">
+    <link rel="import" href="bower_components/paper-button/paper-button.html">
     <link rel="import" href="bower_components/core-menu/core-menu.html">
     <link rel="import" href="bower_components/core-icons/iconsets/communication-icons.html">
     <script src="data.js"></script>
@@ -140,10 +140,10 @@ license that can be found in the LICENSE file.
               </app-dismissable-list>
             </app-list>
             <app-scrollarea-toolbar for="messages">
-              <polymer-ui-toolbar theme="polymer-ui-dark-theme">
-                <core-icon-button icon="add" flex></core-icon-button>
-                <core-icon-button icon="sort" flex></core-icon-button>
-                <core-icon-button icon="google-plus" flex></core-icon-button>
+              <polymer-ui-toolbar>
+                <paper-button icon="add" flex></paper-button>
+                <paper-button icon="sort" flex></paper-button>
+                <paper-button icon="google-plus" flex></paper-button>
               </polymer-ui-toolbar>
             </app-scrollarea-toolbar>
             <app-drawer id="nav-drawer">
