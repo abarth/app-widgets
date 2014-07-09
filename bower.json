@@ -15,11 +15,12 @@
     "tests"
   ],
   "dependencies": {
-    "platform": "Polymer/platform#~0.2.0",
-    "polymer": "Polymer/polymer#~0.2.0",
-    "polymer-elements": "Polymer/polymer-elements#~0.2.0",
-    "polymer-ui-elements": "Polymer/polymer-ui-elements#~0.2.0",
-    "core-icons": "Polymer/core-icons#~0.2.0",
-    "core-icon-button": "Polymer/core-icon-button#~0.2.0"
+    "platform": "Polymer/platform",
+    "polymer": "Polymer/polymer",
+    "polymer-elements": "Polymer/polymer-elements",
+    "polymer-ui-elements": "Polymer/polymer-ui-elements",
+    "core-icons": "Polymer/core-icons",
+    "core-icon-button": "Polymer/core-icon-button",
+    "paper-slider": "Polymer/paper-slider"
   }
 }
