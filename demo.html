@@ -8,19 +8,25 @@ license that can be found in the LICENSE file.
   <head>
     <title>app-widgets</title>
     <script src="bower_components/platform/platform.js"></script>
-    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="import" href="app-widgets.html">
-    <link rel="import" href="bower_components/polymer-ui-menu/polymer-ui-menu.html">
-    <link rel="import" href="bower_components/polymer-ui-menu-item/polymer-ui-menu-item.html">
-    <link rel="import" href="bower_components/polymer-ui-toolbar/polymer-ui-toolbar.html">
-    <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
+    <link rel="import" href="bower_components/font-roboto/roboto.html">
+    <link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
     <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
     <link rel="import" href="bower_components/core-icons/core-icons.html">
+    <link rel="import" href="bower_components/paper-item/paper-item.html">
+    <link rel="import" href="bower_components/paper-button/paper-button.html">
+    <link rel="import" href="bower_components/core-menu/core-menu.html">
+    <link rel="import" href="bower_components/paper-menu-button/paper-menu-button.html">
+    <link rel="import" href="bower_components/core-icons/iconsets/communication-icons.html">
     <script src="data.js"></script>
     <style>
       body {
         -webkit-user-select: none;
+        font-family: "RobotoDraft",Helvetica,Arial,sans-serif;
+        font-weight: 300;
+        line-height: 24px;
       }
     </style>
   </head>
@@ -41,8 +47,7 @@ license that can be found in the LICENSE file.
         background-color: white;
       }
       .conversation {
-        font-family: sans-serif;
-        height: 70px;
+        height: 80px;   /* Make sure this value lines up with app-list.height */
         display: flex;
         border-bottom: 1px solid lightgray;
       }
@@ -106,12 +111,17 @@ license that can be found in the LICENSE file.
       }
       </style>
         <app-frame>
-          <polymer-ui-toolbar theme="polymer-ui-light-theme">
-            <core-icon-button icon="menu" on-tap="{{ toggleMenu }}"></core-icon-button>
+          <core-toolbar>
+            <paper-button icon="menu" on-tap="{{ toggleMenu }}"></paper-button>
             <div flex>Demo app</div>
-            <core-icon-button icon="refresh"></core-icon-button>
-            <core-icon-button icon="add"></core-icon-button>
-          </polymer-ui-toolbar>
+            <paper-button icon="refresh"></paper-button>
+            <paper-menu-button icon="add" valign="bottom" halign="right">
+              <paper-item icon="dialog" label="Ojan"></paper-item>
+              <paper-item icon="dialog" label="Elliott"></paper-item>
+              <paper-item icon="dialog" label="Chris"></paper-item>
+              <paper-item icon="settings" label="Settings"></paper-item>
+            </paper-menu-button>
+          </core-toolbar>
           <app-column>
             <app-list id="messages">
               <app-dismissable-list class="padding-wrapper" on-dismiss-items="{{ dismissItem }}">
@@ -134,28 +144,21 @@ license that can be found in the LICENSE file.
               </app-dismissable-list>
             </app-list>
             <app-scrollarea-toolbar for="messages">
-              <polymer-ui-toolbar theme="polymer-ui-dark-theme">
-                <core-icon-button icon="add" flex></core-icon-button>
-                <core-icon-button icon="sort" flex></core-icon-button>
-                <core-icon-button icon="google-plus" flex></core-icon-button>
-              </polymer-ui-toolbar>
+              <core-toolbar>
+                <paper-button icon="add" flex></paper-button>
+                <paper-button icon="sort" flex></paper-button>
+                <paper-button icon="google-plus" flex></paper-button>
+              </core-toolbar>
             </app-scrollarea-toolbar>
             <app-drawer id="nav-drawer">
-              <polymer-ui-menu selected="0" theme="polymer-ui-light-theme" active="false">
+              <core-menu selected="0" active="false">
                 <template repeat="{{ item in menuItems }}">
-                  <polymer-ui-menu-item icon="{{ item.icon }}" label="{{ item.label }}"></polymer-ui-menu-item>
+                  <paper-item icon="{{ item.icon }}" label="{{ item.label }}"></paper-item>
                 </template>
-              </polymer-ui-menu>
+              </core-menu>
             </app-drawer>
           </app-column>
 
-          <app-expand-menu>
-            <app-expand-menu-item icon="dialog" label="Adam"></app-expand-menu-item>
-            <app-expand-menu-item icon="dialog" label="Ojan"></app-expand-menu-item>
-            <app-expand-menu-item icon="dialog" label="Elliott"></app-expand-menu-item>
-            <app-expand-menu-item icon="dialog" label="Chris"></app-expand-menu-item>
-            <app-expand-menu-item icon="settings" label="Settings"></app-expand-menu-item>
-          </app-expand-menu>
 
         </app-frame>
       </template>
@@ -169,7 +172,7 @@ license that can be found in the LICENSE file.
           },
           dismissItem: function(event) {
             var dataProvider = event.target.parentElement.data;
-            dataProvider.deleteItemByIds(e.detail.items.map(function(item) { return item.id; }));
+            dataProvider.deleteItemByIds(event.detail.items.map(function(item) { return item.id; }));
           },
         });
       </script>

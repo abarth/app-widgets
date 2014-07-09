@@ -10,7 +10,7 @@ function generateFakeDrawerData(numberOfItems) {
   var i = 0;
   while (i < numberOfItems) {
     data[i] = {
-      icon: 'dialog',
+      icon: 'communication:chat',
       label: repeat(String.fromCharCode(65 + i++), 5)
     };
   }

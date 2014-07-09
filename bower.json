@@ -15,11 +15,8 @@
     "tests"
   ],
   "dependencies": {
-    "platform": "Polymer/platform#~0.2.0",
-    "polymer": "Polymer/polymer#~0.2.0",
-    "polymer-elements": "Polymer/polymer-elements#~0.2.0",
-    "polymer-ui-elements": "Polymer/polymer-ui-elements#~0.2.0",
-    "core-icons": "Polymer/core-icons#~0.2.0",
-    "core-icon-button": "Polymer/core-icon-button#~0.2.0"
+    "polymer": "Polymer/polymer#master",
+    "core-elements": "Polymer/core-elements#master",
+    "paper-elements": "Polymer/paper-elements#master"
   }
 }
