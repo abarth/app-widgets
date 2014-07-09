@@ -381,7 +381,7 @@ body {
   </template>
   <script>
     Polymer('app-list', {
-      height: 80,
+      height: 80,   // Make sure this value lines up with .conversation.height
       count: 500,
       enteredView: function() {
         this.$.runway.style.height = this.height * this.count + 'px';
